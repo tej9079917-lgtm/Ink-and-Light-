@@ -1,0 +1,1173 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ink & Light 3D Reader</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Playfair Display & Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif'],
+                    },
+                    colors: {
+                        parchment: '#f7f3ec',
+                        leather: '#1c1917',
+                        gold: '#d2a85e',
+                        darkgold: '#b89047',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #0b0f19; color: #f3f4f6; overflow: hidden; }
+        .font-serif { font-family: 'Playfair Display', serif; }
+        
+        /* Custom Scrollbars */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
+        ::-webkit-scrollbar-thumb { background: #d2a85e; border-radius: 3px; }
+
+        /* FOREST AMBIENT BACKGROUND */
+        .forest-bg {
+            position: absolute; inset: 0; z-index: 0;
+            background: radial-gradient(circle at 50% 30%, #1a2639 0%, #0b0f19 70%);
+            overflow: hidden; pointer-events: none;
+        }
+        .firefly {
+            position: absolute; width: 4px; height: 4px; background: #d2a85e; border-radius: 50%;
+            box-shadow: 0 0 8px 2px rgba(210, 168, 94, 0.6); animation: float 8s infinite ease-in-out; opacity: 0;
+        }
+        @keyframes float {
+            0% { transform: translateY(0px) translateX(0px); opacity: 0; }
+            50% { opacity: 0.8; }
+            100% { transform: translateY(-120px) translateX(60px); opacity: 0; }
+        }
+
+        /* FULLSCREEN OVERRIDES */
+        body.is-fullscreen header,
+        body.is-fullscreen #sidebar { display: none !important; }
+        body.is-fullscreen #app-view { margin: 0 !important; padding: 0 !important; width: 100vw !important; height: 100vh !important; }
+        body.is-fullscreen #view-reader { background-color: #05070a !important; }
+
+        /* 3D BOOK ENGINE STYLES */
+        .book-section { 
+            perspective: 2500px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            width: 100%; 
+            height: 100%; 
+            z-index: 10; 
+            overflow: hidden; 
+            user-select: none;
+        }
+        
+        /* Base Open Spread Dimensions: 1131px wide x 800px high (Each page is 565.5px x 800px -> exact A4 ratio 1:1.414) */
+        .book { 
+            position: relative; 
+            width: 1131px; 
+            height: 800px; 
+            flex-shrink: 0; 
+            transform-style: preserve-3d; 
+            transition: transform 0.15s ease-out;
+            transform-origin: center center;
+        }
+        
+        .paper { 
+            position: absolute; 
+            width: 50%; 
+            height: 100%; 
+            top: 0; 
+            right: 0; 
+            transform-style: preserve-3d; 
+            transform-origin: left center; 
+            transition: transform 0.85s cubic-bezier(0.645, 0.045, 0.355, 1); 
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.4);
+        }
+        .paper.flipped { transform: rotateY(-180deg); }
+        
+        .front, .back { 
+            position: absolute; 
+            width: 100%; 
+            height: 100%; 
+            top: 0; left: 0; 
+            backface-visibility: hidden; 
+            -webkit-backface-visibility: hidden;
+            background-color: #12151c; 
+            overflow: hidden; 
+            box-sizing: border-box; 
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+        .front { transform: rotateY(0deg); }
+        .back { transform: rotateY(180deg); }
+
+        .book-card:hover { transform: translateY(-6px); box-shadow: 0 12px 28px rgba(210, 168, 94, 0.3); border-color: #d2a85e; }
+        .book-card img { aspect-ratio: 2/3; object-fit: cover; }
+        .grab-cursor { cursor: grab; }
+        .grab-cursor:active { cursor: grabbing; }
+    </style>
+</head>
+<body class="h-screen w-screen overflow-hidden relative">
+    <div class="forest-bg" id="forest"></div>
+
+    <div id="app-view" class="flex flex-col h-full w-full relative z-10 transition-all duration-300">
+        <!-- TOP NAVIGATION HEADER -->
+        <header class="h-16 border-b border-white/10 bg-black/40 backdrop-blur-md flex items-center justify-between px-6 z-20">
+            <div class="flex items-center space-x-3 cursor-pointer" onclick="switchView('view-home')">
+                <div class="w-10 h-10 rounded-xl bg-gold/10 border border-gold/30 flex items-center justify-center text-gold">
+                    <i class="fa-solid fa-feather-pointed text-lg"></i>
+                </div>
+                <div>
+                    <h1 class="font-serif font-bold text-lg tracking-wide text-white">Ink & Light</h1>
+                    <span class="text-xs text-gold/80 tracking-widest uppercase">3D Library & Reader</span>
+                </div>
+            </div>
+
+            <!-- Header Actions -->
+            <div class="flex items-center space-x-4">
+                <button onclick="openSyncModal()" class="hidden md:flex items-center space-x-2 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 hover:bg-gold/10 hover:border-gold/30 transition text-xs text-gray-300">
+                    <i class="fa-solid fa-cloud-arrow-down text-gold"></i>
+                    <span>Sync Google Doc</span>
+                </button>
+                <button onclick="openPublishModal()" class="flex items-center space-x-2 px-4 py-2 rounded-lg bg-gold text-black font-semibold hover:bg-darkgold transition text-xs shadow-lg shadow-gold/10">
+                    <i class="fa-solid fa-plus"></i>
+                    <span>Publish Book</span>
+                </button>
+                <div id="auth-container">
+                    <button onclick="openAuthModal()" class="px-4 py-2 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 transition text-xs font-medium">Log In</button>
+                </div>
+            </div>
+        </header>
+
+        <div class="flex flex-1 overflow-hidden relative">
+            <!-- SIDEBAR NAVIGATION -->
+            <nav id="sidebar" class="w-64 border-r border-white/10 bg-black/20 backdrop-blur-md flex flex-col justify-between p-4 z-20 transition-all duration-300">
+                <div class="space-y-6">
+                    <div>
+                        <p class="text-[10px] uppercase font-semibold text-gray-500 tracking-wider px-3 mb-2">Navigation</p>
+                        <div class="space-y-1">
+                            <button onclick="switchView('view-home')" class="sidebar-btn w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl bg-gold/10 text-gold text-sm font-medium transition">
+                                <i class="fa-solid fa-house w-5"></i>
+                                <span>Home Library</span>
+                            </button>
+                            <button onclick="switchView('view-library')" class="sidebar-btn w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-gray-400 hover:text-white hover:bg-white/5 text-sm font-medium transition">
+                                <i class="fa-solid fa-book-bookmark w-5"></i>
+                                <span>Browse Books</span>
+                            </button>
+                            <button onclick="switchView('view-bookmarks')" class="sidebar-btn w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-gray-400 hover:text-white hover:bg-white/5 text-sm font-medium transition">
+                                <i class="fa-solid fa-bookmark w-5"></i>
+                                <span>Bookmarks</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div>
+                        <p class="text-[10px] uppercase font-semibold text-gray-500 tracking-wider px-3 mb-2">Categories</p>
+                        <div class="space-y-1 text-sm text-gray-400">
+                            <button onclick="filterCategory('All')" class="w-full text-left px-3 py-1.5 rounded-lg hover:bg-white/5 transition">All Genres</button>
+                            <button onclick="filterCategory('Fantasy')" class="w-full text-left px-3 py-1.5 rounded-lg hover:bg-white/5 transition">Fantasy & Magic</button>
+                            <button onclick="filterCategory('Manga')" class="w-full text-left px-3 py-1.5 rounded-lg hover:bg-white/5 transition">Manga & Comics</button>
+                            <button onclick="filterCategory('Romance')" class="w-full text-left px-3 py-1.5 rounded-lg hover:bg-white/5 transition">Romance & Drama</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pt-4 border-t border-white/10">
+                    <button onclick="switchView('view-settings')" class="sidebar-btn w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-gray-400 hover:text-white hover:bg-white/5 text-sm font-medium transition">
+                        <i class="fa-solid fa-gear w-5"></i>
+                        <span>Settings</span>
+                    </button>
+                </div>
+            </nav>
+
+            <!-- MAIN MAIN CONTENT AREA -->
+            <main class="flex-1 relative overflow-hidden flex flex-col">
+
+                <!-- 1. HOME VIEW -->
+                <div id="view-home" class="view-panel absolute inset-0 overflow-y-auto p-8 flex flex-col space-y-8">
+                    <!-- Hero Banner -->
+                    <div class="relative rounded-3xl bg-gradient-to-r from-neutral-900 via-stone-900 to-zinc-900 border border-gold/20 p-8 md:p-12 overflow-hidden shadow-2xl">
+                        <div class="absolute right-0 top-0 w-1/3 h-full opacity-10 bg-[radial-gradient(#d2a85e_1px,transparent_1px)] [background-size:16px_16px]"></div>
+                        <div class="relative z-10 max-w-2xl space-y-4">
+                            <span class="px-3 py-1 rounded-full bg-gold/10 border border-gold/30 text-gold text-xs font-semibold uppercase tracking-wider">Immersive Reading</span>
+                            <h2 class="font-serif text-3xl md:text-5xl font-bold tracking-tight text-white leading-tight">Experience Stories in True 3D A4 Elegance</h2>
+                            <p class="text-gray-400 text-sm md:text-base">Upload your manga, novels, or notes, and read them with realistic page turns, full-bleed clarity, smooth zooming, and drag-to-scroll controls.</p>
+                            <div class="pt-2 flex items-center space-x-4">
+                                <button onclick="switchView('view-library')" class="px-6 py-3 rounded-xl bg-gold text-black font-semibold hover:bg-darkgold transition shadow-lg shadow-gold/20 flex items-center space-x-2">
+                                    <i class="fa-solid fa-book-open"></i>
+                                    <span>Explore Library</span>
+                                </button>
+                                <button onclick="openPublishModal()" class="px-6 py-3 rounded-xl bg-white/5 border border-white/10 text-white font-medium hover:bg-white/10 transition">
+                                    Publish Your Book
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Catalog Header -->
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="font-serif text-2xl font-bold text-white">Featured Books & Manga</h3>
+                            <p class="text-xs text-gray-400">Select any volume to launch the interactive 3D reader.</p>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <input type="text" id="search-input" oninput="filterBooks()" placeholder="Search books..." class="bg-black/40 border border-white/10 rounded-xl px-4 py-2 text-xs focus:outline-none focus:border-gold/50 text-white w-48 md:w-64">
+                        </div>
+                    </div>
+
+                    <!-- Books Grid -->
+                    <div id="books-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 pb-12">
+                        <!-- Populated dynamically -->
+                    </div>
+                </div>
+
+                <!-- 2. BROWSE CATALOG VIEW -->
+                <div id="view-library" class="view-panel absolute inset-0 overflow-y-auto p-8 hidden flex-col space-y-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="font-serif text-2xl font-bold text-white">Complete Library Catalog</h3>
+                            <p class="text-xs text-gray-400">All community-published books and uploaded manga.</p>
+                        </div>
+                    </div>
+                    <div id="full-books-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 pb-12">
+                        <!-- Populated dynamically -->
+                    </div>
+                </div>
+
+                <!-- 3. BOOKMARKS VIEW -->
+                <div id="view-bookmarks" class="view-panel absolute inset-0 overflow-y-auto p-8 hidden flex-col space-y-6">
+                    <h3 class="font-serif text-2xl font-bold text-white">Your Bookmarks</h3>
+                    <div id="bookmarks-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
+                        <!-- Populated dynamically -->
+                    </div>
+                </div>
+
+                <!-- 4. SETTINGS VIEW -->
+                <div id="view-settings" class="view-panel absolute inset-0 overflow-y-auto p-8 hidden flex-col space-y-6 max-w-2xl">
+                    <h3 class="font-serif text-2xl font-bold text-white">Reader Settings</h3>
+                    <div class="space-y-4 bg-black/30 border border-white/10 rounded-2xl p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h4 class="font-semibold text-sm text-white">Ambient Firefly Particles</h4>
+                                <p class="text-xs text-gray-400">Toggle floating background lights in the reader.</p>
+                            </div>
+                            <input type="checkbox" id="setting-fireflies" checked onchange="toggleFireflies(this)" class="w-4 h-4 accent-gold cursor-pointer">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 5. 3D A4 READER VIEW WITH ZOOM & PAN CONTROLS -->
+                <div id="view-reader" class="view-panel absolute inset-0 hidden flex-col bg-black/95 z-30">
+                    <!-- Reader Top Navigation Bar -->
+                    <div class="h-14 border-b border-white/10 bg-black/80 backdrop-blur-md flex items-center justify-between px-6 z-20">
+                        <button onclick="closeReader()" class="flex items-center space-x-2 text-gray-400 hover:text-white transition text-xs font-medium">
+                            <i class="fa-solid fa-arrow-left"></i>
+                            <span>Back to Library</span>
+                        </button>
+                        <div class="text-center">
+                            <h3 id="reader-book-title" class="font-serif font-bold text-sm text-white">Book Title</h3>
+                            <span id="reader-page-indicator" class="text-[10px] text-gold tracking-widest uppercase">Spread 1 of 1</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <button onclick="toggleMobileMode()" id="mobile-mode-btn" title="Toggle Vertical Reader Mode" class="px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 text-xs text-gray-300 transition">
+                                <i class="fa-solid fa-mobile-screen"></i> <span class="hidden md:inline">Vertical Mode</span>
+                            </button>
+                            <button onclick="toggleFullscreen()" id="fullscreen-btn" class="px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 text-xs text-gray-300 transition flex items-center space-x-1.5">
+                                <i class="fa-solid fa-expand"></i> <span class="hidden md:inline">Full Screen</span>
+                            </button>
+                            <button onclick="toggleBookmarkCurrent()" id="bookmark-btn" class="w-8 h-8 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 text-xs text-gray-300 transition flex items-center justify-center">
+                                <i class="fa-regular fa-bookmark"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Reader Interactive Canvas / Container -->
+                    <div id="desktop-3d-view" class="book-section flex-1 relative overflow-hidden p-4 grab-cursor">
+                        
+                        <!-- Floating Zoom & Directional Pan Toolbar -->
+                        <div class="absolute bottom-6 right-6 z-40 bg-black/80 backdrop-blur-md border border-white/15 rounded-2xl p-2.5 flex items-center space-x-3 shadow-2xl text-white select-none">
+                            
+                            <!-- Zoom Controls -->
+                            <div class="flex items-center space-x-1">
+                                <button onclick="changeZoom(-0.15)" class="w-8 h-8 rounded-xl bg-white/10 hover:bg-gold/20 hover:text-gold flex items-center justify-center transition" title="Zoom Out (-)">
+                                    <i class="fa-solid fa-minus text-xs"></i>
+                                </button>
+                                <span id="zoom-level-text" class="text-xs font-mono w-12 text-center text-gold font-bold">100%</span>
+                                <button onclick="changeZoom(0.15)" class="w-8 h-8 rounded-xl bg-white/10 hover:bg-gold/20 hover:text-gold flex items-center justify-center transition" title="Zoom In (+)">
+                                    <i class="fa-solid fa-plus text-xs"></i>
+                                </button>
+                                <button onclick="resetZoom()" class="px-2.5 py-1.5 rounded-xl bg-white/10 hover:bg-gold/20 hover:text-gold text-xs font-medium transition flex items-center space-x-1" title="Fit to Screen">
+                                    <i class="fa-solid fa-compress-arrows-alt text-xs"></i>
+                                    <span>Fit</span>
+                                </button>
+                            </div>
+
+                            <div class="h-6 w-px bg-white/20"></div>
+
+                            <!-- Directional D-Pad Pan Controls -->
+                            <div class="flex items-center space-x-2">
+                                <span class="text-[10px] text-gray-400 font-medium hidden sm:inline">Pan:</span>
+                                <div class="grid grid-cols-3 gap-0.5 w-16 h-16 bg-white/5 border border-white/10 rounded-xl p-1 items-center justify-center">
+                                    <div></div>
+                                    <button onclick="panBook(0, 60)" class="h-4 flex items-center justify-center text-gray-300 hover:text-gold transition" title="Pan Up"><i class="fa-solid fa-caret-up text-xs"></i></button>
+                                    <div></div>
+                                    <button onclick="panBook(60, 0)" class="h-4 flex items-center justify-center text-gray-300 hover:text-gold transition" title="Pan Left"><i class="fa-solid fa-caret-left text-xs"></i></button>
+                                    <button onclick="resetPan()" class="h-4 flex items-center justify-center text-gold transition" title="Center View"><i class="fa-solid fa-crosshairs text-[10px]"></i></button>
+                                    <button onclick="panBook(-60, 0)" class="h-4 flex items-center justify-center text-gray-300 hover:text-gold transition" title="Pan Right"><i class="fa-solid fa-caret-right text-xs"></i></button>
+                                    <div></div>
+                                    <button onclick="panBook(0, -60)" class="h-4 flex items-center justify-center text-gray-300 hover:text-gold transition" title="Pan Down"><i class="fa-solid fa-caret-down text-xs"></i></button>
+                                    <div></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 3D Book Container -->
+                        <div id="book" class="book">
+                            <!-- Pages are dynamically generated here -->
+                        </div>
+                    </div>
+
+                    <!-- Vertical Reader Container (Fallback Mode) -->
+                    <div id="vertical-reader-view" class="hidden flex-1 overflow-y-auto p-6 md:px-32 max-w-4xl mx-auto space-y-8">
+                        <!-- Dynamically populated vertical pages -->
+                    </div>
+
+                    <!-- Reader Bottom Navigation Bar -->
+                    <div class="h-16 border-t border-white/10 bg-black/80 backdrop-blur-md flex items-center justify-between px-8 z-20">
+                        <button onclick="prevPage()" class="w-10 h-10 rounded-full bg-white/5 border border-white/10 hover:bg-gold/20 hover:border-gold/50 text-gold flex items-center justify-center transition">
+                            <i class="fa-solid fa-chevron-left"></i>
+                        </button>
+                        <div class="text-xs text-gray-400 flex items-center space-x-3">
+                            <span><i class="fa-regular fa-keyboard text-gold mr-1"></i> Arrow Keys Turn Pages</span>
+                            <span class="hidden sm:inline">•</span>
+                            <span class="hidden sm:inline"><i class="fa-solid fa-hand text-gold mr-1"></i> Click & Drag to Scroll/Pan</span>
+                        </div>
+                        <button onclick="nextPage()" class="w-10 h-10 rounded-full bg-white/5 border border-white/10 hover:bg-gold/20 hover:border-gold/50 text-gold flex items-center justify-center transition">
+                            <i class="fa-solid fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+            </main>
+        </div>
+    </div>
+
+    <!-- PUBLISH BOOK MODAL -->
+    <div id="publish-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-neutral-900 border border-white/10 rounded-3xl w-full max-w-xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
+            <div class="p-6 border-b border-white/10 flex items-center justify-between">
+                <h3 class="font-serif font-bold text-lg text-white">Publish a Book or Manga</h3>
+                <button onclick="closePublishModal()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <div class="p-6 overflow-y-auto space-y-4 flex-1">
+                <div>
+                    <label class="block text-xs font-medium text-gray-400 mb-1">Book Title</label>
+                    <input type="text" id="pub-title" placeholder="e.g. Mister Romeo - Special Edition" class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-gold">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-medium text-gray-400 mb-1">Genre</label>
+                        <select id="pub-genre" class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-gold">
+                            <option value="Manga">Manga & Comics</option>
+                            <option value="Fantasy">Fantasy</option>
+                            <option value="Romance">Romance</option>
+                            <option value="Sci-Fi">Sci-Fi</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-400 mb-1">Cover Image URL</label>
+                        <input type="text" id="pub-cover" placeholder="https://..." class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-gold">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-400 mb-2">Book Pages (Add Image URLs or Text)</label>
+                    <div id="pub-pages-container" class="space-y-2 max-h-48 overflow-y-auto pr-2 custom-scrollbar">
+                        <div class="flex items-start space-x-2 page-input-row">
+                            <span class="text-xs text-gray-500 font-mono w-4 pt-3 page-number">1.</span>
+                            <textarea rows="1" class="pub-page-input w-full bg-black/50 border border-white/10 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-gold font-mono text-xs resize-y" placeholder="https://image-link.jpg or page text..."></textarea>
+                            <button onclick="removePageInput(this)" class="mt-2 text-gray-500 hover:text-red-400 transition" title="Remove Page"><i class="fa-solid fa-trash"></i></button>
+                        </div>
+                    </div>
+                    <button onclick="addPageInput()" class="mt-3 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-xs text-gold hover:bg-white/10 transition flex items-center space-x-2">
+                        <i class="fa-solid fa-plus"></i>
+                        <span>Add Another Page</span>
+                    </button>
+                </div>
+            </div>
+            <div class="p-6 border-t border-white/10 flex items-center justify-end space-x-3 bg-black/30">
+                <button onclick="closePublishModal()" class="px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-xs text-gray-300 hover:bg-white/10">Cancel</button>
+                <button onclick="submitBook()" class="px-6 py-2 rounded-xl bg-gold text-black text-xs font-semibold hover:bg-darkgold shadow-lg shadow-gold/20">Publish Now</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- GOOGLE DOC SYNC MODAL -->
+    <div id="sync-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-neutral-900 border border-white/10 rounded-3xl w-full max-w-md overflow-hidden shadow-2xl flex flex-col">
+            <div class="p-6 border-b border-white/10 flex items-center justify-between">
+                <h3 class="font-serif font-bold text-lg text-white">Import Google Doc</h3>
+                <button onclick="closeSyncModal()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <div class="p-6 space-y-4">
+                <p class="text-xs text-gray-400">Paste your public Google Doc URL to automatically extract and format its contents into an A4 3D book.</p>
+                <div>
+                    <label class="block text-xs font-medium text-gray-400 mb-1">Google Doc URL</label>
+                    <input type="text" id="sync-url" placeholder="https://docs.google.com/document/d/..." class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-gold">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-400 mb-1">Book Title</label>
+                    <input type="text" id="sync-title" placeholder="My Imported Novel" class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-gold">
+                </div>
+            </div>
+            <div class="p-6 border-t border-white/10 flex items-center justify-end space-x-3 bg-black/30">
+                <button onclick="closeSyncModal()" class="px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-xs text-gray-300">Cancel</button>
+                <button onclick="processGoogleDocSync()" class="px-6 py-2 rounded-xl bg-gold text-black text-xs font-semibold hover:bg-darkgold">Import & Read</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- AUTH MODAL -->
+    <div id="auth-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-neutral-900 border border-white/10 rounded-3xl w-full max-w-md overflow-hidden shadow-2xl flex flex-col">
+            <div class="p-6 border-b border-white/10 flex items-center justify-between">
+                <h3 id="auth-title" class="font-serif font-bold text-lg text-white">Log In to Ink & Light</h3>
+                <button onclick="closeAuthModal()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <div class="p-6 space-y-4">
+                <div>
+                    <label class="block text-xs font-medium text-gray-400 mb-1">Email Address</label>
+                    <input type="email" id="auth-email" placeholder="reader@example.com" class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-gold">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-400 mb-1">Password</label>
+                    <input type="password" id="auth-password" placeholder="••••••••" class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-gold">
+                </div>
+            </div>
+            <div class="p-6 border-t border-white/10 flex items-center justify-between bg-black/30">
+                <button onclick="toggleAuthMode()" id="auth-switch-btn" class="text-xs text-gold hover:underline">Need an account? Register</button>
+                <button onclick="handleAuthSubmit()" class="px-6 py-2 rounded-xl bg-gold text-black text-xs font-semibold hover:bg-darkgold">Continue</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Live Google Apps Script API Endpoint
+        const API_URL = 'https://script.google.com/macros/s/AKfycbzhRZm0qBCQv7wjvbeuCZBY4sNY_wNFXz0HeLcZLmh9tP0ZJZDxpzdMoYa8l36Yg0j-6A/exec';
+
+        // --- Ambient Firefly Generator ---
+        function initFireflies() {
+            const container = document.getElementById('forest');
+            if (!container) return;
+            container.innerHTML = '';
+            for (let i = 0; i < 25; i++) {
+                const firefly = document.createElement('div');
+                firefly.className = 'firefly';
+                firefly.style.left = Math.random() * 100 + '%';
+                firefly.style.top = (Math.random() * 50 + 50) + '%';
+                firefly.style.animationDuration = (6 + Math.random() * 6) + 's';
+                firefly.style.animationDelay = (Math.random() * 5) + 's';
+                container.appendChild(firefly);
+            }
+        }
+        initFireflies();
+
+        // --- Library Sample Data & API Integration ---
+        let books = [];
+
+        async function fetchLiveBooks() {
+            try {
+                const response = await fetch(API_URL);
+                const result = await response.json();
+
+                if (result.success && Array.isArray(result.data) && result.data.length > 0) {
+                    const loadedBooks = result.data.map(item => {
+                        let pagesList = [];
+                        if (item['Content']) {
+                            pagesList = item['Content'].toString().split('||PAGE||').map(p => p.trim());
+                        }
+                        const cover = item['Cover URL'] || 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=600&q=80';
+                        return {
+                            id: item['Book ID'] || ('bk_' + Math.random()),
+                            title: item['Title'] || 'Untitled',
+                            genre: item['Genre'] || 'General',
+                            coverUrl: cover,
+                            pages: pagesList.length > 0 ? [cover, ...pagesList] : [cover, 'No page content available.']
+                        };
+                    });
+                    
+                    // Prepend live sheet books to current catalog
+                    books = [...loadedBooks, ...books];
+                    renderHomeCatalog();
+                }
+            } catch (err) {
+                console.warn('Backend API offline or unreachable, running in offline mode:', err);
+            }
+        }
+        fetchLiveBooks();
+
+        let bookmarks = [];
+        let currentBook = null;
+        let currentPageIndex = 0; // Spread index
+        let isMobileReadingMode = false;
+        let isPseudoFullscreen = false;
+
+        // --- Zoom & Pan Engine State ---
+        let userZoomLevel = 1.0;
+        let panX = 0;
+        let panY = 0;
+        let isPanning = false;
+        let startX = 0, startY = 0;
+
+        // --- Navigation & View Controller ---
+        function switchView(viewId) {
+            document.querySelectorAll('.view-panel').forEach(panel => panel.classList.add('hidden'));
+            document.getElementById(viewId).classList.remove('hidden');
+
+            document.querySelectorAll('.sidebar-btn').forEach(btn => {
+                btn.classList.remove('bg-gold/10', 'text-gold');
+                btn.classList.add('text-gray-400');
+            });
+            if (event && event.currentTarget && event.currentTarget.classList) {
+                event.currentTarget.classList.add('bg-gold/10', 'text-gold');
+                event.currentTarget.classList.remove('text-gray-400');
+            }
+        }
+
+        function renderHomeCatalog() {
+            const grid = document.getElementById('books-grid');
+            const fullGrid = document.getElementById('full-books-grid');
+            
+            if (books.length === 0) {
+                const emptyState = `<div class="col-span-full flex flex-col items-center justify-center text-center py-16 text-gray-500 border-2 border-dashed border-white/10 rounded-2xl">
+                    <i class="fa-solid fa-book-open text-4xl mb-4 text-gold/50"></i>
+                    <p class="font-serif text-lg text-white mb-2">Your library is empty</p>
+                    <p class="text-xs">Publish a book or sync a Google Doc to get started.</p>
+                </div>`;
+                if (grid) grid.innerHTML = emptyState;
+                if (fullGrid) fullGrid.innerHTML = emptyState;
+                return;
+            }
+
+            const html = books.map(book => `
+                <div onclick="openReader('${book.id}')" class="book-card cursor-pointer bg-neutral-900 border border-white/10 rounded-2xl p-3 flex flex-col space-y-3 transition duration-300">
+                    <img src="${book.coverUrl}" alt="${book.title}" onerror="this.onerror=null; this.src='https://placehold.co/600x900/12151c/d2a85e?text=Cover+Unavailable';" class="w-full rounded-xl shadow-md">
+                    <div class="overflow-hidden">
+                        <span class="text-[10px] text-gold font-semibold uppercase tracking-wider block truncate w-full">${book.genre}</span>
+                        <h4 class="font-serif font-bold text-sm text-white truncate mt-0.5">${book.title}</h4>
+                    </div>
+                </div>
+            `).join('');
+
+            if (grid) grid.innerHTML = html;
+            if (fullGrid) fullGrid.innerHTML = html;
+        }
+        renderHomeCatalog();
+
+        // --- 3D A4 Reader Engine ---
+        function openReader(bookId) {
+            currentBook = books.find(b => b.id === bookId);
+            if (!currentBook) return;
+
+            currentPageIndex = 0;
+            resetZoom();
+            document.getElementById('reader-book-title').innerText = currentBook.title;
+            switchView('view-reader');
+            buildBookDOM();
+            updateReaderUI();
+            
+            // Allow container layout before sizing transform
+            setTimeout(updateBookTransform, 50);
+        }
+
+        function closeReader() {
+            if (document.fullscreenElement) {
+                document.exitFullscreen();
+            } else if (isPseudoFullscreen) {
+                disablePseudoFullscreen();
+            }
+            switchView('view-home');
+        }
+
+        // --- STREAMING_CHUNK:Building book leaves and link rendering logic... ---
+        function buildBookDOM() {
+            const bookEl = document.getElementById('book');
+            const verticalEl = document.getElementById('vertical-reader-view');
+            
+            let totalPages = [...currentBook.pages];
+            // Ensure even count for spread layout
+            if (totalPages.length % 2 !== 0) {
+                totalPages.push("");
+            }
+
+            // Build Vertical View
+            verticalEl.innerHTML = totalPages.map((pageContent, idx) => `
+                <div class="bg-neutral-900 border border-white/10 rounded-2xl p-6 shadow-2xl relative">
+                    <span class="absolute top-4 right-6 text-xs text-gold/60 font-mono">Page ${idx + 1}</span>
+                    <div class="mt-2">${renderPageContent(pageContent)}</div>
+                </div>
+            `).join('');
+
+            // Build 3D Spread Leaves
+            // Leaf i handles Page 2i (front, unflipped right side) and Page 2i+1 (back, flipped left side)
+            let leavesHTML = '';
+            const totalLeaves = Math.ceil(totalPages.length / 2);
+
+            for (let i = 0; i < totalLeaves; i++) {
+                let rightContent = totalPages[2 * i] || "";
+                let leftContent = totalPages[(2 * i) + 1] || "";
+                leavesHTML += createLeafHTML(i, totalLeaves, rightContent, leftContent);
+            }
+
+            bookEl.innerHTML = leavesHTML;
+        }
+
+        function createLeafHTML(index, totalLeaves, rightText, leftText) {
+            return `
+                <div class="paper" data-leaf="${index}" style="z-index: ${totalLeaves - index};">
+                    <div class="front">
+                        <div class="h-full w-full relative flex flex-col justify-between bg-[#12151c] border-l border-white/5 select-none overflow-hidden">
+                            ${renderPageContent(rightText)}
+                            ${rightText ? `<span class="absolute bottom-3 right-4 text-[10px] text-gray-500 font-mono z-10">${(index * 2) + 1}</span>` : ''}
+                        </div>
+                    </div>
+                    <div class="back">
+                        <div class="h-full w-full relative flex flex-col justify-between bg-[#151921] border-r border-white/5 select-none overflow-hidden">
+                            ${renderPageContent(leftText)}
+                            ${leftText ? `<span class="absolute bottom-3 left-4 text-[10px] text-gray-500 font-mono z-10">${(index * 2) + 2}</span>` : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // --- Page Content & Link Parser ---
+        function renderPageContent(content) {
+            if (!content || !content.trim()) {
+                return '<div class="flex items-center justify-center h-full w-full text-gray-600 italic font-serif text-sm">Blank Page</div>';
+            }
+            
+            let trimmed = content.trim();
+
+            // 1. Direct Image URL or Data URI
+            if (/^(https?:\/\/|data:image\/).+/i.test(trimmed) && !trimmed.includes('\n') && !trimmed.includes(' ')) {
+                return `
+                    <div class="w-full h-full relative flex items-center justify-center bg-black/40 overflow-hidden">
+                        <img src="${trimmed}" 
+                             alt="Book Page" 
+                             onerror="this.onerror=null; this.src='https://placehold.co/800x1131/12151c/d2a85e?text=Image+Unavailable';" 
+                             class="w-full h-full object-contain pointer-events-none select-none" 
+                             draggable="false">
+                    </div>`;
+            }
+
+            // 2. Markdown Image Syntax ![alt](url)
+            const mdImgMatch = trimmed.match(/^!\[.*?\]\((https?:\/\/[^\s)]+)\)$/i);
+            if (mdImgMatch) {
+                return `
+                    <div class="w-full h-full relative flex items-center justify-center bg-black/40 overflow-hidden">
+                        <img src="${mdImgMatch[1]}" 
+                             alt="Book Page" 
+                             onerror="this.onerror=null; this.src='https://placehold.co/800x1131/12151c/d2a85e?text=Image+Unavailable';" 
+                             class="w-full h-full object-contain pointer-events-none select-none" 
+                             draggable="false">
+                    </div>`;
+            }
+
+            // 3. HTML Content Tag
+            if (/<[a-z][\s\S]*>/i.test(trimmed)) {
+                return `<div class="w-full h-full p-6 overflow-y-auto font-serif text-gray-200 leading-relaxed text-sm">${trimmed}</div>`;
+            }
+
+            // 4. Formatted Plain Text
+            return `<div class="w-full h-full p-8 overflow-y-auto font-serif text-gray-200 text-sm md:text-base leading-relaxed whitespace-pre-wrap">${escapeHTML(trimmed)}</div>`;
+        }
+
+        function escapeHTML(str) {
+            return str.replace(/[&<>'"]/g, tag => ({
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                "'": '&#39;',
+                '"': '&quot;'
+            }[tag] || tag));
+        }
+
+        function updateReaderUI() {
+            const papers = document.querySelectorAll('.paper');
+            const totalLeaves = papers.length;
+
+            papers.forEach((paper, idx) => {
+                if (idx < currentPageIndex) {
+                    paper.classList.add('flipped');
+                    paper.style.zIndex = idx + 1; // Flipped left stack order
+                } else {
+                    paper.classList.remove('flipped');
+                    paper.style.zIndex = totalLeaves - idx; // Unflipped right stack order
+                }
+            });
+
+            document.getElementById('reader-page-indicator').innerText = `Spread ${currentPageIndex + 1} of ${totalLeaves}`;
+            updateBookmarkButtonState();
+        }
+
+        function nextPage() {
+            const papers = document.querySelectorAll('.paper');
+            if (currentPageIndex < papers.length) {
+                currentPageIndex++;
+                updateReaderUI();
+            }
+        }
+
+        function prevPage() {
+            if (currentPageIndex > 0) {
+                currentPageIndex--;
+                updateReaderUI();
+            }
+        }
+
+        // --- STREAMING_CHUNK:Implementing Zoom & Pan Transform Controls... ---
+        function updateBookTransform() {
+            const container = document.getElementById('desktop-3d-view');
+            if (!container) return;
+            
+            const containerWidth = container.clientWidth || window.innerWidth;
+            const containerHeight = container.clientHeight || window.innerHeight;
+            
+            // Base A4 spread proportions fit
+            const baseFitScale = Math.min((containerWidth * 0.92) / 1131, (containerHeight * 0.86) / 800);
+            const finalScale = Math.max(0.15, baseFitScale * userZoomLevel);
+            
+            const bookEl = document.getElementById('book');
+            if (bookEl) {
+                bookEl.style.transform = `scale(${finalScale}) translate(${panX}px, ${panY}px)`;
+            }
+            
+            const zoomText = document.getElementById('zoom-level-text');
+            if (zoomText) {
+                zoomText.innerText = `${Math.round(userZoomLevel * 100)}%`;
+            }
+        }
+
+        function changeZoom(delta) {
+            userZoomLevel = Math.min(3.0, Math.max(0.4, userZoomLevel + delta));
+            updateBookTransform();
+        }
+
+        function resetZoom() {
+            userZoomLevel = 1.0;
+            panX = 0;
+            panY = 0;
+            updateBookTransform();
+        }
+
+        function panBook(dx, dy) {
+            panX += dx;
+            panY += dy;
+            updateBookTransform();
+        }
+
+        function resetPan() {
+            panX = 0;
+            panY = 0;
+            updateBookTransform();
+        }
+
+        // --- Drag-to-Pan and Touch/Wheel Listeners ---
+        function initPanZoomListeners() {
+            const viewArea = document.getElementById('desktop-3d-view');
+            if (!viewArea) return;
+
+            // Mouse Drag Pan
+            viewArea.addEventListener('mousedown', (e) => {
+                if (e.target.closest('button') || e.target.closest('input')) return;
+                isPanning = true;
+                startX = e.clientX - panX;
+                startY = e.clientY - panY;
+            });
+
+            window.addEventListener('mousemove', (e) => {
+                if (!isPanning) return;
+                panX = e.clientX - startX;
+                panY = e.clientY - startY;
+                updateBookTransform();
+            });
+
+            window.addEventListener('mouseup', () => {
+                isPanning = false;
+            });
+
+            // Touch Drag Pan
+            viewArea.addEventListener('touchstart', (e) => {
+                if (e.touches.length === 1) {
+                    if (e.target.closest('button') || e.target.closest('input')) return;
+                    isPanning = true;
+                    startX = e.touches[0].clientX - panX;
+                    startY = e.touches[0].clientY - panY;
+                }
+            }, { passive: true });
+
+            window.addEventListener('touchmove', (e) => {
+                if (!isPanning || e.touches.length !== 1) return;
+                panX = e.touches[0].clientX - startX;
+                panY = e.touches[0].clientY - startY;
+                updateBookTransform();
+            }, { passive: true });
+
+            window.addEventListener('touchend', () => {
+                isPanning = false;
+            });
+
+            // Mouse Wheel Zoom
+            viewArea.addEventListener('wheel', (e) => {
+                if (document.getElementById('view-reader').classList.contains('hidden')) return;
+                e.preventDefault();
+                const delta = e.deltaY < 0 ? 0.1 : -0.1;
+                changeZoom(delta);
+            }, { passive: false });
+
+            // Window Resize
+            window.addEventListener('resize', () => {
+                updateBookTransform();
+            });
+        }
+        initPanZoomListeners();
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (document.getElementById('view-reader').classList.contains('hidden')) return;
+            if (e.key === 'ArrowRight') nextPage();
+            if (e.key === 'ArrowLeft') prevPage();
+        });
+
+        // --- Fullscreen Toggle with Fallback ---
+        function toggleFullscreen() {
+            const readerView = document.getElementById('view-reader');
+            const fullscreenBtn = document.getElementById('fullscreen-btn');
+
+            if (!document.fullscreenElement && !isPseudoFullscreen) {
+                if (readerView.requestFullscreen) {
+                    readerView.requestFullscreen().catch(() => enablePseudoFullscreen());
+                } else {
+                    enablePseudoFullscreen();
+                }
+            } else {
+                if (document.fullscreenElement) {
+                    document.exitFullscreen();
+                } else {
+                    disablePseudoFullscreen();
+                }
+            }
+        }
+
+        function enablePseudoFullscreen() {
+            isPseudoFullscreen = true;
+            document.body.classList.add('is-fullscreen');
+            document.getElementById('fullscreen-btn').innerHTML = '<i class="fa-solid fa-compress"></i> <span class="hidden md:inline">Exit</span>';
+        }
+
+        function disablePseudoFullscreen() {
+            isPseudoFullscreen = false;
+            document.body.classList.remove('is-fullscreen');
+            document.getElementById('fullscreen-btn').innerHTML = '<i class="fa-solid fa-expand"></i> <span class="hidden md:inline">Full Screen</span>';
+        }
+
+        document.addEventListener('fullscreenchange', () => {
+            const btn = document.getElementById('fullscreen-btn');
+            if (!document.fullscreenElement && !isPseudoFullscreen) {
+                document.body.classList.remove('is-fullscreen');
+                btn.innerHTML = '<i class="fa-solid fa-expand"></i> <span class="hidden md:inline">Full Screen</span>';
+            } else if (document.fullscreenElement) {
+                btn.innerHTML = '<i class="fa-solid fa-compress"></i> <span class="hidden md:inline">Exit</span>';
+            }
+        });
+
+        // --- Mobile View Toggle ---
+        function toggleMobileMode() {
+            isMobileReadingMode = !isMobileReadingMode;
+            const desktopView = document.getElementById('desktop-3d-view');
+            const verticalView = document.getElementById('vertical-reader-view');
+            const btn = document.getElementById('mobile-mode-btn');
+
+            if (isMobileReadingMode) {
+                desktopView.classList.add('hidden');
+                verticalView.classList.remove('hidden');
+                btn.classList.add('bg-gold/20', 'text-gold');
+            } else {
+                desktopView.classList.remove('hidden');
+                verticalView.classList.add('hidden');
+                btn.classList.remove('bg-gold/20', 'text-gold');
+                updateBookTransform();
+            }
+        }
+
+        // --- Bookmarks Management ---
+        function toggleBookmarkCurrent() {
+            if (!currentBook) return;
+            const existingIdx = bookmarks.findIndex(b => b.bookId === currentBook.id && b.spread === currentPageIndex);
+            
+            if (existingIdx > -1) {
+                bookmarks.splice(existingIdx, 1);
+            } else {
+                bookmarks.push({ bookId: currentBook.id, title: currentBook.title, coverUrl: currentBook.coverUrl, spread: currentPageIndex });
+            }
+            updateBookmarkButtonState();
+            renderBookmarks();
+        }
+
+        function updateBookmarkButtonState() {
+            if (!currentBook) return;
+            const btn = document.getElementById('bookmark-btn');
+            const isBookmarked = bookmarks.some(b => b.bookId === currentBook.id && b.spread === currentPageIndex);
+            if (isBookmarked) {
+                btn.innerHTML = '<i class="fa-solid fa-bookmark text-gold"></i>';
+            } else {
+                btn.innerHTML = '<i class="fa-regular fa-bookmark"></i>';
+            }
+        }
+
+        function renderBookmarks() {
+            const grid = document.getElementById('bookmarks-grid');
+            if (!grid) return;
+            if (bookmarks.length === 0) {
+                grid.innerHTML = '<p class="text-xs text-gray-500 col-span-full">No bookmarks saved yet. Click the bookmark icon while reading.</p>';
+                return;
+            }
+            grid.innerHTML = bookmarks.map(b => `
+                <div onclick="openReader('${b.bookId}'); currentPageIndex = ${b.spread}; updateReaderUI();" class="book-card cursor-pointer bg-neutral-900 border border-white/10 rounded-2xl p-3 flex flex-col space-y-3">
+                    <img src="${b.coverUrl}" class="w-full rounded-xl shadow-md">
+                    <div>
+                        <h4 class="font-serif font-bold text-sm text-white truncate">${b.title}</h4>
+                        <span class="text-[10px] text-gold">Spread #${b.spread + 1}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // --- Modals & Actions ---
+        function openPublishModal() { document.getElementById('publish-modal').classList.remove('hidden'); }
+        function closePublishModal() { document.getElementById('publish-modal').classList.add('hidden'); }
+        function openSyncModal() { document.getElementById('sync-modal').classList.remove('hidden'); }
+        function closeSyncModal() { document.getElementById('sync-modal').classList.add('hidden'); }
+        function openAuthModal() { document.getElementById('auth-modal').classList.remove('hidden'); }
+        function closeAuthModal() { document.getElementById('auth-modal').classList.add('hidden'); }
+
+        // --- STREAMING_CHUNK:Adding dynamic multiple page upload logic... ---
+        function addPageInput() {
+            const container = document.getElementById('pub-pages-container');
+            const rowCount = container.querySelectorAll('.page-input-row').length + 1;
+            
+            const row = document.createElement('div');
+            row.className = 'flex items-start space-x-2 page-input-row';
+            row.innerHTML = `
+                <span class="text-xs text-gray-500 font-mono w-4 pt-3 page-number">${rowCount}.</span>
+                <textarea rows="1" class="pub-page-input w-full bg-black/50 border border-white/10 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-gold font-mono text-xs resize-y" placeholder="https://image-link.jpg or page text..."></textarea>
+                <button onclick="removePageInput(this)" class="mt-2 text-gray-500 hover:text-red-400 transition" title="Remove Page"><i class="fa-solid fa-trash"></i></button>
+            `;
+            container.appendChild(row);
+            
+            // Auto-scroll to bottom
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function removePageInput(btn) {
+            const container = document.getElementById('pub-pages-container');
+            if (container.querySelectorAll('.page-input-row').length <= 1) {
+                alert('You must have at least one page.');
+                return;
+            }
+            btn.closest('.page-input-row').remove();
+            
+            // Re-number
+            const rows = container.querySelectorAll('.page-input-row');
+            rows.forEach((row, index) => {
+                row.querySelector('.page-number').innerText = (index + 1) + '.';
+            });
+        }
+
+        let isRegisterMode = false;
+        function toggleAuthMode() {
+            isRegisterMode = !isRegisterMode;
+            document.getElementById('auth-title').innerText = isRegisterMode ? 'Create Account' : 'Log In to Ink & Light';
+            document.getElementById('auth-switch-btn').innerText = isRegisterMode ? 'Already have an account? Log In' : 'Need an account? Register';
+        }
+
+        async function handleAuthSubmit() {
+            const email = document.getElementById('auth-email').value;
+            const password = document.getElementById('auth-password').value;
+
+            if (!email || !password) { 
+                alert('Please enter your email and password.'); 
+                return; 
+            }
+
+            try {
+                const payload = {
+                    action: isRegisterMode ? 'register' : 'login',
+                    email: email,
+                    password: password
+                };
+
+                const res = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify(payload)
+                });
+                const result = await res.json();
+
+                if (result.success) {
+                    document.getElementById('auth-container').innerHTML = `<span class="text-xs text-gold font-medium"><i class="fa-solid fa-user-check mr-1"></i>${email}</span>`;
+                    closeAuthModal();
+                } else {
+                    alert('Auth Error: ' + (result.error || 'Authentication failed.'));
+                }
+            } catch (err) {
+                // Client-side fallback if server CORS blocks POST
+                document.getElementById('auth-container').innerHTML = `<span class="text-xs text-gold font-medium">${email}</span>`;
+                closeAuthModal();
+            }
+        }
+
+        async function submitBook() {
+            const title = document.getElementById('pub-title').value;
+            const genre = document.getElementById('pub-genre').value;
+            const coverUrl = document.getElementById('pub-cover').value || 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=600&q=80';
+            
+            // Gather all page inputs dynamically
+            const pageInputs = Array.from(document.querySelectorAll('.pub-page-input'));
+            const pages = pageInputs.map(input => input.value.trim()).filter(val => val !== '');
+            const rawContent = pages.join(' ||PAGE|| ');
+
+            if (!title || pages.length === 0) {
+                alert('Please fill out the title and add at least one page.');
+                return;
+            }
+
+            const newBook = {
+                id: 'bk_' + Date.now(),
+                title,
+                genre,
+                coverUrl,
+                pages: [coverUrl, ...pages]
+            };
+
+            // Post to live backend endpoint
+            try {
+                fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify({
+                        action: 'publish',
+                        bookId: newBook.id,
+                        title: title,
+                        genre: genre,
+                        coverUrl: coverUrl,
+                        content: rawContent
+                    })
+                });
+            } catch (err) {
+                console.warn('Published locally, API post skipped:', err);
+            }
+
+            books.unshift(newBook);
+            renderHomeCatalog();
+            closePublishModal();
+            
+            // Reset modal inputs for next use
+            document.getElementById('pub-title').value = '';
+            document.getElementById('pub-cover').value = '';
+            document.getElementById('pub-pages-container').innerHTML = `
+                <div class="flex items-start space-x-2 page-input-row">
+                    <span class="text-xs text-gray-500 font-mono w-4 pt-3 page-number">1.</span>
+                    <textarea rows="1" class="pub-page-input w-full bg-black/50 border border-white/10 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-gold font-mono text-xs resize-y" placeholder="https://image-link.jpg or page text..."></textarea>
+                    <button onclick="removePageInput(this)" class="mt-2 text-gray-500 hover:text-red-400 transition" title="Remove Page"><i class="fa-solid fa-trash"></i></button>
+                </div>`;
+
+            openReader(newBook.id);
+        }
+
+        async function processGoogleDocSync() {
+            const docUrl = document.getElementById('sync-url').value;
+            const title = document.getElementById('sync-title').value || 'Imported Google Doc';
+
+            if (!docUrl) {
+                alert('Please enter a valid public Google Doc URL.');
+                return;
+            }
+
+            // Save doc entry to backend Google Sheet for Apps Script sync
+            try {
+                await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify({
+                        action: 'publish',
+                        title: title,
+                        genre: 'Document',
+                        coverUrl: 'https://images.unsplash.com/photo-1457369804613-52c61a468e7d?auto=format&fit=crop&w=600&q=80',
+                        content: `Synced from: ${docUrl}`
+                    })
+                });
+            } catch (err) {
+                console.warn('Doc reference saved locally:', err);
+            }
+
+            closeSyncModal();
+            alert(`Document reference submitted! Trigger "Sync Google Docs" from your sheet menu to import content automatically.`);
+        }
+
+        function filterBooks() {
+            const query = document.getElementById('search-input').value.toLowerCase();
+            const filtered = books.filter(b => b.title.toLowerCase().includes(query) || b.genre.toLowerCase().includes(query));
+            updateGrid(filtered);
+        }
+
+        function filterCategory(genre) {
+            if (genre === 'All') {
+                renderHomeCatalog();
+                return;
+            }
+            const filtered = books.filter(b => b.genre.toLowerCase() === genre.toLowerCase());
+            updateGrid(filtered);
+        }
+
+        function updateGrid(filtered) {
+            const grid = document.getElementById('books-grid');
+            if (!grid) return;
+            
+            if (filtered.length === 0) {
+                grid.innerHTML = `<div class="col-span-full flex flex-col items-center justify-center text-center py-16 text-gray-500 border-2 border-dashed border-white/10 rounded-2xl">
+                    <i class="fa-solid fa-magnifying-glass text-3xl mb-4 text-white/20"></i>
+                    <p class="font-serif text-lg text-white mb-2">No books found</p>
+                    <p class="text-xs">Try adjusting your search or category filters.</p>
+                </div>`;
+                return;
+            }
+
+            grid.innerHTML = filtered.map(book => `
+                <div onclick="openReader('${book.id}')" class="book-card cursor-pointer bg-neutral-900 border border-white/10 rounded-2xl p-3 flex flex-col space-y-3 transition duration-300">
+                    <img src="${book.coverUrl}" alt="${book.title}" onerror="this.onerror=null; this.src='https://placehold.co/600x900/12151c/d2a85e?text=Cover+Unavailable';" class="w-full rounded-xl shadow-md">
+                    <div class="overflow-hidden">
+                        <span class="text-[10px] text-gold font-semibold uppercase tracking-wider block truncate w-full">${book.genre}</span>
+                        <h4 class="font-serif font-bold text-sm text-white truncate mt-0.5">${book.title}</h4>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function toggleFireflies(el) {
+            const bg = document.getElementById('forest');
+            if (bg) bg.style.display = el.checked ? 'block' : 'none';
+        }
+    </script>
+</body>
+</html>
