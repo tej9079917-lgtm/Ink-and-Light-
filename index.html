@@ -122,36 +122,45 @@
 
     <div id="app-view" class="flex flex-col h-full w-full relative z-10 transition-all duration-300">
         <!-- TOP NAVIGATION HEADER -->
-        <header class="h-16 border-b border-white/10 bg-black/40 backdrop-blur-md flex items-center justify-between px-6 z-20">
-            <div class="flex items-center space-x-3 cursor-pointer" onclick="switchView('view-home')">
-                <div class="w-10 h-10 rounded-xl bg-gold/10 border border-gold/30 flex items-center justify-center text-gold">
-                    <i class="fa-solid fa-feather-pointed text-lg"></i>
-                </div>
-                <div>
-                    <h1 class="font-serif font-bold text-lg tracking-wide text-white">Ink & Light</h1>
-                    <span class="text-xs text-gold/80 tracking-widest uppercase">3D Library & Reader</span>
+        <header class="h-16 border-b border-white/10 bg-black/40 backdrop-blur-md flex items-center justify-between px-4 md:px-6 z-30 relative">
+            <div class="flex items-center">
+                <button onclick="toggleSidebar()" class="md:hidden text-gray-300 hover:text-white mr-3">
+                    <i class="fa-solid fa-bars text-xl"></i>
+                </button>
+                <div class="flex items-center space-x-2 md:space-x-3 cursor-pointer" onclick="switchView('view-home')">
+                    <div class="w-8 h-8 md:w-10 md:h-10 rounded-xl bg-gold/10 border border-gold/30 flex items-center justify-center text-gold">
+                        <i class="fa-solid fa-feather-pointed text-base md:text-lg"></i>
+                    </div>
+                    <div>
+                        <h1 class="font-serif font-bold text-base md:text-lg tracking-wide text-white leading-tight">Ink & Light</h1>
+                        <span class="hidden sm:block text-[10px] md:text-xs text-gold/80 tracking-widest uppercase">3D Library & Reader</span>
+                    </div>
                 </div>
             </div>
 
             <!-- Header Actions -->
-            <div class="flex items-center space-x-4">
+            <div class="flex items-center space-x-2 md:space-x-4">
                 <button onclick="openSyncModal()" class="hidden md:flex items-center space-x-2 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 hover:bg-gold/10 hover:border-gold/30 transition text-xs text-gray-300">
                     <i class="fa-solid fa-cloud-arrow-down text-gold"></i>
                     <span>Sync Google Doc</span>
                 </button>
-                <button onclick="openPublishModal()" class="flex items-center space-x-2 px-4 py-2 rounded-lg bg-gold text-black font-semibold hover:bg-darkgold transition text-xs shadow-lg shadow-gold/10">
+                <button onclick="openPublishModal()" class="flex items-center space-x-1 md:space-x-2 px-3 py-1.5 md:px-4 md:py-2 rounded-lg bg-gold text-black font-semibold hover:bg-darkgold transition text-[10px] md:text-xs shadow-lg shadow-gold/10">
                     <i class="fa-solid fa-plus"></i>
-                    <span>Publish Book</span>
+                    <span class="hidden sm:inline">Publish Book</span>
+                    <span class="sm:hidden">Publish</span>
                 </button>
                 <div id="auth-container">
-                    <button onclick="openAuthModal()" class="px-4 py-2 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 transition text-xs font-medium">Log In</button>
+                    <button onclick="openAuthModal()" class="px-3 py-1.5 md:px-4 md:py-2 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 transition text-[10px] md:text-xs font-medium">Log In</button>
                 </div>
             </div>
         </header>
 
-        <div class="flex flex-1 overflow-hidden relative">
+        <div class="flex flex-1 overflow-hidden relative w-full">
+            <!-- Mobile Sidebar Overlay -->
+            <div id="sidebar-overlay" onclick="toggleSidebar()" class="absolute inset-0 bg-black/60 backdrop-blur-sm z-30 hidden md:hidden"></div>
+
             <!-- SIDEBAR NAVIGATION -->
-            <nav id="sidebar" class="w-64 border-r border-white/10 bg-black/20 backdrop-blur-md flex flex-col justify-between p-4 z-20 transition-all duration-300">
+            <nav id="sidebar" class="absolute md:relative z-40 h-full w-64 border-r border-white/10 bg-black/95 md:bg-black/20 backdrop-blur-md flex flex-col justify-between p-4 transition-transform duration-300 transform -translate-x-full md:translate-x-0">
                 <div class="space-y-6">
                     <div>
                         <p class="text-[10px] uppercase font-semibold text-gray-500 tracking-wider px-3 mb-2">Navigation</p>
@@ -196,23 +205,23 @@
             </nav>
 
             <!-- MAIN MAIN CONTENT AREA -->
-            <main class="flex-1 relative overflow-hidden flex flex-col">
+            <main class="flex-1 relative overflow-hidden flex flex-col w-full">
 
                 <!-- 1. HOME VIEW -->
-                <div id="view-home" class="view-panel absolute inset-0 overflow-y-auto p-8 flex flex-col space-y-8">
+                <div id="view-home" class="view-panel absolute inset-0 overflow-y-auto p-4 md:p-8 flex flex-col space-y-6 md:space-y-8">
                     <!-- Hero Banner -->
-                    <div class="relative rounded-3xl bg-gradient-to-r from-neutral-900 via-stone-900 to-zinc-900 border border-gold/20 p-8 md:p-12 overflow-hidden shadow-2xl">
+                    <div class="relative rounded-3xl bg-gradient-to-r from-neutral-900 via-stone-900 to-zinc-900 border border-gold/20 p-5 md:p-12 overflow-hidden shadow-2xl">
                         <div class="absolute right-0 top-0 w-1/3 h-full opacity-10 bg-[radial-gradient(#d2a85e_1px,transparent_1px)] [background-size:16px_16px]"></div>
-                        <div class="relative z-10 max-w-2xl space-y-4">
-                            <span class="px-3 py-1 rounded-full bg-gold/10 border border-gold/30 text-gold text-xs font-semibold uppercase tracking-wider">Immersive Reading</span>
-                            <h2 class="font-serif text-3xl md:text-5xl font-bold tracking-tight text-white leading-tight">Experience Stories in True 3D A4 Elegance</h2>
-                            <p class="text-gray-400 text-sm md:text-base">Upload your manga, novels, or notes, and read them with realistic page turns, full-bleed clarity, smooth zooming, and drag-to-scroll controls.</p>
-                            <div class="pt-2 flex items-center space-x-4">
-                                <button onclick="switchView('view-library')" class="px-6 py-3 rounded-xl bg-gold text-black font-semibold hover:bg-darkgold transition shadow-lg shadow-gold/20 flex items-center space-x-2">
+                        <div class="relative z-10 max-w-2xl space-y-3 md:space-y-4">
+                            <span class="px-3 py-1 rounded-full bg-gold/10 border border-gold/30 text-gold text-[10px] md:text-xs font-semibold uppercase tracking-wider">Immersive Reading</span>
+                            <h2 class="font-serif text-2xl md:text-5xl font-bold tracking-tight text-white leading-tight">Experience Stories in True 3D A4 Elegance</h2>
+                            <p class="text-gray-400 text-xs md:text-base">Upload your manga, novels, or notes, and read them with realistic page turns, full-bleed clarity, smooth zooming, and drag-to-scroll controls.</p>
+                            <div class="pt-2 flex flex-col sm:flex-row sm:items-center space-y-3 sm:space-y-0 sm:space-x-4">
+                                <button onclick="switchView('view-library')" class="w-full sm:w-auto px-6 py-3 rounded-xl bg-gold text-black font-semibold hover:bg-darkgold transition shadow-lg shadow-gold/20 flex items-center justify-center space-x-2">
                                     <i class="fa-solid fa-book-open"></i>
                                     <span>Explore Library</span>
                                 </button>
-                                <button onclick="openPublishModal()" class="px-6 py-3 rounded-xl bg-white/5 border border-white/10 text-white font-medium hover:bg-white/10 transition">
+                                <button onclick="openPublishModal()" class="w-full sm:w-auto px-6 py-3 rounded-xl bg-white/5 border border-white/10 text-white font-medium hover:bg-white/10 transition text-center">
                                     Publish Your Book
                                 </button>
                             </div>
@@ -220,46 +229,46 @@
                     </div>
 
                     <!-- Catalog Header -->
-                    <div class="flex items-center justify-between">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         <div>
-                            <h3 class="font-serif text-2xl font-bold text-white">Featured Books & Manga</h3>
+                            <h3 class="font-serif text-xl md:text-2xl font-bold text-white">Featured Books & Manga</h3>
                             <p class="text-xs text-gray-400">Select any volume to launch the interactive 3D reader.</p>
                         </div>
-                        <div class="flex items-center space-x-2">
-                            <input type="text" id="search-input" oninput="filterBooks()" placeholder="Search books..." class="bg-black/40 border border-white/10 rounded-xl px-4 py-2 text-xs focus:outline-none focus:border-gold/50 text-white w-48 md:w-64">
+                        <div class="flex items-center w-full sm:w-auto">
+                            <input type="text" id="search-input" oninput="filterBooks()" placeholder="Search books..." class="bg-black/40 border border-white/10 rounded-xl px-4 py-2 text-xs focus:outline-none focus:border-gold/50 text-white w-full sm:w-48 md:w-64">
                         </div>
                     </div>
 
                     <!-- Books Grid -->
-                    <div id="books-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 pb-12">
+                    <div id="books-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6 pb-12">
                         <!-- Populated dynamically -->
                     </div>
                 </div>
 
                 <!-- 2. BROWSE CATALOG VIEW -->
-                <div id="view-library" class="view-panel absolute inset-0 overflow-y-auto p-8 hidden flex-col space-y-6">
+                <div id="view-library" class="view-panel absolute inset-0 overflow-y-auto p-4 md:p-8 hidden flex-col space-y-4 md:space-y-6">
                     <div class="flex items-center justify-between">
                         <div>
-                            <h3 class="font-serif text-2xl font-bold text-white">Complete Library Catalog</h3>
+                            <h3 class="font-serif text-xl md:text-2xl font-bold text-white">Complete Library Catalog</h3>
                             <p class="text-xs text-gray-400">All community-published books and uploaded manga.</p>
                         </div>
                     </div>
-                    <div id="full-books-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 pb-12">
+                    <div id="full-books-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6 pb-12">
                         <!-- Populated dynamically -->
                     </div>
                 </div>
 
                 <!-- 3. BOOKMARKS VIEW -->
-                <div id="view-bookmarks" class="view-panel absolute inset-0 overflow-y-auto p-8 hidden flex-col space-y-6">
-                    <h3 class="font-serif text-2xl font-bold text-white">Your Bookmarks</h3>
-                    <div id="bookmarks-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
+                <div id="view-bookmarks" class="view-panel absolute inset-0 overflow-y-auto p-4 md:p-8 hidden flex-col space-y-4 md:space-y-6">
+                    <h3 class="font-serif text-xl md:text-2xl font-bold text-white">Your Bookmarks</h3>
+                    <div id="bookmarks-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6">
                         <!-- Populated dynamically -->
                     </div>
                 </div>
 
                 <!-- 4. SETTINGS VIEW -->
-                <div id="view-settings" class="view-panel absolute inset-0 overflow-y-auto p-8 hidden flex-col space-y-6 max-w-2xl">
-                    <h3 class="font-serif text-2xl font-bold text-white">Reader Settings</h3>
+                <div id="view-settings" class="view-panel absolute inset-0 overflow-y-auto p-4 md:p-8 hidden flex-col space-y-4 md:space-y-6 max-w-2xl">
+                    <h3 class="font-serif text-xl md:text-2xl font-bold text-white">Reader Settings</h3>
                     <div class="space-y-4 bg-black/30 border border-white/10 rounded-2xl p-6">
                         <div class="flex items-center justify-between">
                             <div>
@@ -537,6 +546,24 @@
         var isPanning = false;
         var startX = 0, startY = 0;
 
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            sidebar.classList.toggle('-translate-x-full');
+            overlay.classList.toggle('hidden');
+        }
+
+        function closeSidebarOnMobile() {
+            if (window.innerWidth < 768) {
+                const sidebar = document.getElementById('sidebar');
+                const overlay = document.getElementById('sidebar-overlay');
+                if (sidebar && overlay) {
+                    sidebar.classList.add('-translate-x-full');
+                    overlay.classList.add('hidden');
+                }
+            }
+        }
+
         // --- Navigation & View Controller ---
         function switchView(viewId) {
             document.querySelectorAll('.view-panel').forEach(panel => panel.classList.add('hidden'));
@@ -551,6 +578,8 @@
                 e.currentTarget.classList.add('bg-gold/10', 'text-gold');
                 e.currentTarget.classList.remove('text-gray-400');
             }
+            
+            closeSidebarOnMobile();
         }
 
         function renderHomeCatalog() {
@@ -1258,10 +1287,12 @@
         function filterCategory(category) {
             if (category === 'All') {
                 renderHomeCatalog();
+                closeSidebarOnMobile();
                 return;
             }
             const filtered = books.filter(b => b.genre.toLowerCase().includes(category.toLowerCase()));
             updateGrid(filtered);
+            closeSidebarOnMobile();
         }
 
         function updateGrid(filtered) {
