@@ -175,9 +175,14 @@
                         <p class="text-[10px] uppercase font-semibold text-gray-500 tracking-wider px-3 mb-2">Categories</p>
                         <div class="space-y-1 text-sm text-gray-400">
                             <button onclick="filterCategory('All')" class="w-full text-left px-3 py-1.5 rounded-lg hover:bg-white/5 transition">All Genres</button>
+                            <button onclick="filterCategory('Action')" class="w-full text-left px-3 py-1.5 rounded-lg hover:bg-white/5 transition">Action</button>
                             <button onclick="filterCategory('Fantasy')" class="w-full text-left px-3 py-1.5 rounded-lg hover:bg-white/5 transition">Fantasy & Magic</button>
+                            <button onclick="filterCategory('Horror')" class="w-full text-left px-3 py-1.5 rounded-lg hover:bg-white/5 transition">Horror & Thriller</button>
                             <button onclick="filterCategory('Manga')" class="w-full text-left px-3 py-1.5 rounded-lg hover:bg-white/5 transition">Manga & Comics</button>
+                            <button onclick="filterCategory('Mystery')" class="w-full text-left px-3 py-1.5 rounded-lg hover:bg-white/5 transition">Mystery</button>
                             <button onclick="filterCategory('Romance')" class="w-full text-left px-3 py-1.5 rounded-lg hover:bg-white/5 transition">Romance & Drama</button>
+                            <button onclick="filterCategory('Sci-Fi')" class="w-full text-left px-3 py-1.5 rounded-lg hover:bg-white/5 transition">Sci-Fi</button>
+                            <button onclick="filterCategory('Slice of Life')" class="w-full text-left px-3 py-1.5 rounded-lg hover:bg-white/5 transition">Slice of Life</button>
                         </div>
                     </div>
                 </div>
@@ -292,45 +297,7 @@
                     </div>
 
                     <!-- Reader Interactive Canvas / Container -->
-                    <div id="desktop-3d-view" class="book-section flex-1 relative overflow-hidden p-4 grab-cursor">
-                        
-                        <!-- Floating Zoom & Directional Pan Toolbar -->
-                        <div class="absolute bottom-6 right-6 z-40 bg-black/80 backdrop-blur-md border border-white/15 rounded-2xl p-2.5 flex items-center space-x-3 shadow-2xl text-white select-none">
-                            
-                            <!-- Zoom Controls -->
-                            <div class="flex items-center space-x-1">
-                                <button onclick="changeZoom(-0.15)" class="w-8 h-8 rounded-xl bg-white/10 hover:bg-gold/20 hover:text-gold flex items-center justify-center transition" title="Zoom Out (-)">
-                                    <i class="fa-solid fa-minus text-xs"></i>
-                                </button>
-                                <span id="zoom-level-text" class="text-xs font-mono w-12 text-center text-gold font-bold">100%</span>
-                                <button onclick="changeZoom(0.15)" class="w-8 h-8 rounded-xl bg-white/10 hover:bg-gold/20 hover:text-gold flex items-center justify-center transition" title="Zoom In (+)">
-                                    <i class="fa-solid fa-plus text-xs"></i>
-                                </button>
-                                <button onclick="resetZoom()" class="px-2.5 py-1.5 rounded-xl bg-white/10 hover:bg-gold/20 hover:text-gold text-xs font-medium transition flex items-center space-x-1" title="Fit to Screen">
-                                    <i class="fa-solid fa-compress-arrows-alt text-xs"></i>
-                                    <span>Fit</span>
-                                </button>
-                            </div>
-
-                            <div class="h-6 w-px bg-white/20"></div>
-
-                            <!-- Directional D-Pad Pan Controls -->
-                            <div class="flex items-center space-x-2">
-                                <span class="text-[10px] text-gray-400 font-medium hidden sm:inline">Pan:</span>
-                                <div class="grid grid-cols-3 gap-0.5 w-16 h-16 bg-white/5 border border-white/10 rounded-xl p-1 items-center justify-center">
-                                    <div></div>
-                                    <button onclick="panBook(0, 60)" class="h-4 flex items-center justify-center text-gray-300 hover:text-gold transition" title="Pan Up"><i class="fa-solid fa-caret-up text-xs"></i></button>
-                                    <div></div>
-                                    <button onclick="panBook(60, 0)" class="h-4 flex items-center justify-center text-gray-300 hover:text-gold transition" title="Pan Left"><i class="fa-solid fa-caret-left text-xs"></i></button>
-                                    <button onclick="resetPan()" class="h-4 flex items-center justify-center text-gold transition" title="Center View"><i class="fa-solid fa-crosshairs text-[10px]"></i></button>
-                                    <button onclick="panBook(-60, 0)" class="h-4 flex items-center justify-center text-gray-300 hover:text-gold transition" title="Pan Right"><i class="fa-solid fa-caret-right text-xs"></i></button>
-                                    <div></div>
-                                    <button onclick="panBook(0, -60)" class="h-4 flex items-center justify-center text-gray-300 hover:text-gold transition" title="Pan Down"><i class="fa-solid fa-caret-down text-xs"></i></button>
-                                    <div></div>
-                                </div>
-                            </div>
-                        </div>
-
+                    <div id="desktop-3d-view" class="book-section flex-1 relative overflow-hidden p-4 grab-cursor" style="touch-action: none;">
                         <!-- 3D Book Container -->
                         <div id="book" class="book">
                             <!-- Pages are dynamically generated here -->
@@ -338,22 +305,59 @@
                     </div>
 
                     <!-- Vertical Reader Container (Fallback Mode) -->
-                    <div id="vertical-reader-view" class="hidden flex-1 overflow-y-auto p-6 md:px-32 max-w-4xl mx-auto space-y-8">
+                    <div id="vertical-reader-view" class="hidden w-full flex-1 overflow-y-auto p-4 md:p-6 pb-40 max-w-4xl mx-auto space-y-4 scroll-smooth" style="transform-origin: top center; transition: transform 0.2s ease-out;">
                         <!-- Dynamically populated vertical pages -->
                     </div>
 
-                    <!-- Reader Bottom Navigation Bar -->
-                    <div class="h-16 border-t border-white/10 bg-black/80 backdrop-blur-md flex items-center justify-between px-8 z-20">
-                        <button onclick="prevPage()" class="w-10 h-10 rounded-full bg-white/5 border border-white/10 hover:bg-gold/20 hover:border-gold/50 text-gold flex items-center justify-center transition">
-                            <i class="fa-solid fa-chevron-left"></i>
+                    <!-- Unified Reader Bottom Navigation & Controls -->
+                    <div class="absolute bottom-0 left-0 w-full border-t border-white/10 bg-black/90 backdrop-blur-md z-40 flex flex-row items-center justify-between p-3 md:px-8 md:py-4 shadow-[0_-10px_40px_rgba(0,0,0,0.5)] gap-2 md:gap-6">
+                        
+                        <!-- Left: Prev Page -->
+                        <button onclick="prevPage()" class="shrink-0 w-10 h-10 md:w-12 md:h-12 rounded-full bg-white/5 border border-white/10 hover:bg-gold/20 hover:border-gold/50 text-gold flex items-center justify-center transition shadow-lg">
+                            <i class="fa-solid fa-chevron-left text-lg"></i>
                         </button>
-                        <div class="text-xs text-gray-400 flex items-center space-x-3">
-                            <span><i class="fa-regular fa-keyboard text-gold mr-1"></i> Arrow Keys Turn Pages</span>
-                            <span class="hidden sm:inline">•</span>
-                            <span class="hidden sm:inline"><i class="fa-solid fa-hand text-gold mr-1"></i> Click & Drag to Scroll/Pan</span>
+
+                        <!-- Center: Controls Container -->
+                        <div class="flex-1 flex justify-center overflow-x-auto custom-scrollbar pb-1 md:pb-0">
+                            <div class="flex items-center space-x-2 md:space-x-4 text-white select-none bg-white/5 border border-white/10 rounded-2xl p-1.5 md:p-2 min-w-max">
+                                <!-- Zoom Controls -->
+                                <div class="flex items-center space-x-1">
+                                    <button onclick="changeZoom(-0.15)" class="w-8 h-8 rounded-xl bg-white/10 hover:bg-gold/20 hover:text-gold flex items-center justify-center transition" title="Zoom Out (-)">
+                                        <i class="fa-solid fa-minus text-xs"></i>
+                                    </button>
+                                    <span id="zoom-level-text" class="text-xs font-mono w-12 text-center text-gold font-bold">100%</span>
+                                    <button onclick="changeZoom(0.15)" class="w-8 h-8 rounded-xl bg-white/10 hover:bg-gold/20 hover:text-gold flex items-center justify-center transition" title="Zoom In (+)">
+                                        <i class="fa-solid fa-plus text-xs"></i>
+                                    </button>
+                                    <button onclick="resetZoom()" class="px-2.5 py-1.5 rounded-xl bg-white/10 hover:bg-gold/20 hover:text-gold text-xs font-medium transition flex items-center space-x-1" title="Fit to Screen">
+                                        <i class="fa-solid fa-compress-arrows-alt text-xs"></i>
+                                        <span class="hidden sm:inline">Fit</span>
+                                    </button>
+                                </div>
+
+                                <div class="h-8 w-px bg-white/20"></div>
+
+                                <!-- Directional D-Pad Pan Controls -->
+                                <div class="flex items-center space-x-2">
+                                    <span class="text-[10px] text-gray-400 font-medium hidden md:inline uppercase tracking-wider">Pan:</span>
+                                    <div class="grid grid-cols-3 gap-0.5 w-16 h-16 bg-black/40 border border-white/10 rounded-xl p-1 items-center justify-center">
+                                        <div></div>
+                                        <button onclick="panBook(0, 60)" class="h-4 flex items-center justify-center text-gray-300 hover:text-gold transition" title="Pan Up"><i class="fa-solid fa-caret-up text-xs"></i></button>
+                                        <div></div>
+                                        <button onclick="panBook(60, 0)" class="h-4 flex items-center justify-center text-gray-300 hover:text-gold transition" title="Pan Left"><i class="fa-solid fa-caret-left text-xs"></i></button>
+                                        <button onclick="resetPan()" class="h-4 flex items-center justify-center text-gold transition" title="Center View"><i class="fa-solid fa-crosshairs text-[10px]"></i></button>
+                                        <button onclick="panBook(-60, 0)" class="h-4 flex items-center justify-center text-gray-300 hover:text-gold transition" title="Pan Right"><i class="fa-solid fa-caret-right text-xs"></i></button>
+                                        <div></div>
+                                        <button onclick="panBook(0, -60)" class="h-4 flex items-center justify-center text-gray-300 hover:text-gold transition" title="Pan Down"><i class="fa-solid fa-caret-down text-xs"></i></button>
+                                        <div></div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <button onclick="nextPage()" class="w-10 h-10 rounded-full bg-white/5 border border-white/10 hover:bg-gold/20 hover:border-gold/50 text-gold flex items-center justify-center transition">
-                            <i class="fa-solid fa-chevron-right"></i>
+
+                        <!-- Right: Next Page -->
+                        <button onclick="nextPage()" class="shrink-0 w-10 h-10 md:w-12 md:h-12 rounded-full bg-white/5 border border-white/10 hover:bg-gold/20 hover:border-gold/50 text-gold flex items-center justify-center transition shadow-lg">
+                            <i class="fa-solid fa-chevron-right text-lg"></i>
                         </button>
                     </div>
                 </div>
@@ -374,15 +378,19 @@
                     <label class="block text-xs font-medium text-gray-400 mb-1">Book Title</label>
                     <input type="text" id="pub-title" placeholder="e.g. Mister Romeo - Special Edition" class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-gold">
                 </div>
-                <div class="grid grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 gap-4">
                     <div>
-                        <label class="block text-xs font-medium text-gray-400 mb-1">Genre</label>
-                        <select id="pub-genre" class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-gold">
-                            <option value="Manga">Manga & Comics</option>
-                            <option value="Fantasy">Fantasy</option>
-                            <option value="Romance">Romance</option>
-                            <option value="Sci-Fi">Sci-Fi</option>
-                        </select>
+                        <label class="block text-xs font-medium text-gray-400 mb-2">Genres (Select multiple)</label>
+                        <div id="pub-genres-container" class="flex flex-wrap gap-2">
+                            <button type="button" class="genre-pill px-3 py-1 rounded-full border border-white/20 text-xs text-gray-400 hover:text-white hover:border-white/50 transition" onclick="toggleGenre(this)">Action</button>
+                            <button type="button" class="genre-pill px-3 py-1 rounded-full border border-white/20 text-xs text-gray-400 hover:text-white hover:border-white/50 transition" onclick="toggleGenre(this)">Fantasy</button>
+                            <button type="button" class="genre-pill px-3 py-1 rounded-full border border-white/20 text-xs text-gray-400 hover:text-white hover:border-white/50 transition" onclick="toggleGenre(this)">Horror</button>
+                            <button type="button" class="genre-pill px-3 py-1 rounded-full border border-white/20 text-xs text-gray-400 hover:text-white hover:border-white/50 transition" onclick="toggleGenre(this)">Manga</button>
+                            <button type="button" class="genre-pill px-3 py-1 rounded-full border border-white/20 text-xs text-gray-400 hover:text-white hover:border-white/50 transition" onclick="toggleGenre(this)">Mystery</button>
+                            <button type="button" class="genre-pill px-3 py-1 rounded-full border border-white/20 text-xs text-gray-400 hover:text-white hover:border-white/50 transition" onclick="toggleGenre(this)">Romance</button>
+                            <button type="button" class="genre-pill px-3 py-1 rounded-full border border-white/20 text-xs text-gray-400 hover:text-white hover:border-white/50 transition" onclick="toggleGenre(this)">Sci-Fi</button>
+                            <button type="button" class="genre-pill px-3 py-1 rounded-full border border-white/20 text-xs text-gray-400 hover:text-white hover:border-white/50 transition" onclick="toggleGenre(this)">Slice of Life</button>
+                        </div>
                     </div>
                     <div>
                         <label class="block text-xs font-medium text-gray-400 mb-1">Cover Image URL</label>
@@ -462,7 +470,7 @@
 
     <script>
         // Live Google Apps Script API Endpoint
-        const API_URL = 'https://script.google.com/macros/s/AKfycbzhRZm0qBCQv7wjvbeuCZBY4sNY_wNFXz0HeLcZLmh9tP0ZJZDxpzdMoYa8l36Yg0j-6A/exec';
+        var API_URL = 'https://script.google.com/macros/s/AKfycbzhRZm0qBCQv7wjvbeuCZBY4sNY_wNFXz0HeLcZLmh9tP0ZJZDxpzdMoYa8l36Yg0j-6A/exec';
 
         // --- Ambient Firefly Generator ---
         function initFireflies() {
@@ -482,7 +490,7 @@
         initFireflies();
 
         // --- Library Sample Data & API Integration ---
-        let books = [];
+        var books = [];
 
         async function fetchLiveBooks() {
             try {
@@ -515,18 +523,19 @@
         }
         fetchLiveBooks();
 
-        let bookmarks = [];
-        let currentBook = null;
-        let currentPageIndex = 0; // Spread index
-        let isMobileReadingMode = false;
-        let isPseudoFullscreen = false;
+        var bookmarks = [];
+        var currentBook = null;
+        var currentPageIndex = 0; // Spread index
+        var currentVerticalPage = 0; // Vertical page index
+        var isMobileReadingMode = false;
+        var isPseudoFullscreen = false;
 
         // --- Zoom & Pan Engine State ---
-        let userZoomLevel = 1.0;
-        let panX = 0;
-        let panY = 0;
-        let isPanning = false;
-        let startX = 0, startY = 0;
+        var userZoomLevel = 1.0;
+        var panX = 0;
+        var panY = 0;
+        var isPanning = false;
+        var startX = 0, startY = 0;
 
         // --- Navigation & View Controller ---
         function switchView(viewId) {
@@ -537,9 +546,10 @@
                 btn.classList.remove('bg-gold/10', 'text-gold');
                 btn.classList.add('text-gray-400');
             });
-            if (event && event.currentTarget && event.currentTarget.classList) {
-                event.currentTarget.classList.add('bg-gold/10', 'text-gold');
-                event.currentTarget.classList.remove('text-gray-400');
+            var e = window.event;
+            if (e && e.currentTarget && e.currentTarget.classList) {
+                e.currentTarget.classList.add('bg-gold/10', 'text-gold');
+                e.currentTarget.classList.remove('text-gray-400');
             }
         }
 
@@ -579,11 +589,22 @@
             if (!currentBook) return;
 
             currentPageIndex = 0;
+            currentVerticalPage = 0;
             resetZoom();
             document.getElementById('reader-book-title').innerText = currentBook.title;
             switchView('view-reader');
             buildBookDOM();
+            
+            // Auto-switch to vertical on mobile
+            if (window.innerWidth < 768) {
+                isMobileReadingMode = true;
+            } else {
+                isMobileReadingMode = false;
+            }
+            applyReadingMode();
+            
             updateReaderUI();
+            initVerticalObserver();
             
             // Allow container layout before sizing transform
             setTimeout(updateBookTransform, 50);
@@ -596,6 +617,17 @@
                 disablePseudoFullscreen();
             }
             switchView('view-home');
+        }
+
+        function toggleGenre(btn) {
+            btn.classList.toggle('selected-genre');
+            if (btn.classList.contains('selected-genre')) {
+                btn.classList.add('bg-gold/20', 'text-gold', 'border-gold/50');
+                btn.classList.remove('text-gray-400', 'border-white/20');
+            } else {
+                btn.classList.remove('bg-gold/20', 'text-gold', 'border-gold/50');
+                btn.classList.add('text-gray-400', 'border-white/20');
+            }
         }
 
         // --- STREAMING_CHUNK:Building book leaves and link rendering logic... ---
@@ -611,9 +643,9 @@
 
             // Build Vertical View
             verticalEl.innerHTML = totalPages.map((pageContent, idx) => `
-                <div class="bg-neutral-900 border border-white/10 rounded-2xl p-6 shadow-2xl relative">
-                    <span class="absolute top-4 right-6 text-xs text-gold/60 font-mono">Page ${idx + 1}</span>
-                    <div class="mt-2">${renderPageContent(pageContent)}</div>
+                <div id="vert-page-${idx}" data-idx="${idx}" class="vert-page relative w-full max-w-4xl mx-auto flex flex-col items-center justify-center mb-4 bg-neutral-900 border border-white/5 rounded-2xl overflow-hidden shadow-2xl">
+                    <span class="absolute top-4 right-4 text-xs text-white bg-black/70 px-2 py-1 rounded z-20">Page ${idx + 1}</span>
+                    <div class="w-full flex items-center justify-center">${renderPageContent(pageContent, true)}</div>
                 </div>
             `).join('');
 
@@ -636,13 +668,13 @@
                 <div class="paper" data-leaf="${index}" style="z-index: ${totalLeaves - index};">
                     <div class="front">
                         <div class="h-full w-full relative flex flex-col justify-between bg-[#12151c] border-l border-white/5 select-none overflow-hidden">
-                            ${renderPageContent(rightText)}
+                            ${renderPageContent(rightText, false)}
                             ${rightText ? `<span class="absolute bottom-3 right-4 text-[10px] text-gray-500 font-mono z-10">${(index * 2) + 1}</span>` : ''}
                         </div>
                     </div>
                     <div class="back">
                         <div class="h-full w-full relative flex flex-col justify-between bg-[#151921] border-r border-white/5 select-none overflow-hidden">
-                            ${renderPageContent(leftText)}
+                            ${renderPageContent(leftText, false)}
                             ${leftText ? `<span class="absolute bottom-3 left-4 text-[10px] text-gray-500 font-mono z-10">${(index * 2) + 2}</span>` : ''}
                         </div>
                     </div>
@@ -651,21 +683,24 @@
         }
 
         // --- Page Content & Link Parser ---
-        function renderPageContent(content) {
+        function renderPageContent(content, isVertical = false) {
             if (!content || !content.trim()) {
                 return '<div class="flex items-center justify-center h-full w-full text-gray-600 italic font-serif text-sm">Blank Page</div>';
             }
             
             let trimmed = content.trim();
 
+            const imgClass = isVertical ? "w-full h-auto object-contain block" : "w-full h-full object-contain pointer-events-none select-none";
+            const containerClass = isVertical ? "w-full flex items-center justify-center bg-black/10" : "w-full h-full relative flex items-center justify-center bg-black/40 overflow-hidden";
+
             // 1. Direct Image URL or Data URI
             if (/^(https?:\/\/|data:image\/).+/i.test(trimmed) && !trimmed.includes('\n') && !trimmed.includes(' ')) {
                 return `
-                    <div class="w-full h-full relative flex items-center justify-center bg-black/40 overflow-hidden">
+                    <div class="${containerClass}">
                         <img src="${trimmed}" 
                              alt="Book Page" 
                              onerror="this.onerror=null; this.src='https://placehold.co/800x1131/12151c/d2a85e?text=Image+Unavailable';" 
-                             class="w-full h-full object-contain pointer-events-none select-none" 
+                             class="${imgClass}" 
                              draggable="false">
                     </div>`;
             }
@@ -674,22 +709,22 @@
             const mdImgMatch = trimmed.match(/^!\[.*?\]\((https?:\/\/[^\s)]+)\)$/i);
             if (mdImgMatch) {
                 return `
-                    <div class="w-full h-full relative flex items-center justify-center bg-black/40 overflow-hidden">
+                    <div class="${containerClass}">
                         <img src="${mdImgMatch[1]}" 
                              alt="Book Page" 
                              onerror="this.onerror=null; this.src='https://placehold.co/800x1131/12151c/d2a85e?text=Image+Unavailable';" 
-                             class="w-full h-full object-contain pointer-events-none select-none" 
+                             class="${imgClass}" 
                              draggable="false">
                     </div>`;
             }
 
             // 3. HTML Content Tag
             if (/<[a-z][\s\S]*>/i.test(trimmed)) {
-                return `<div class="w-full h-full p-6 overflow-y-auto font-serif text-gray-200 leading-relaxed text-sm">${trimmed}</div>`;
+                return `<div class="w-full ${isVertical ? 'h-auto' : 'h-full'} p-6 overflow-y-auto font-serif text-gray-200 leading-relaxed text-sm">${trimmed}</div>`;
             }
 
             // 4. Formatted Plain Text
-            return `<div class="w-full h-full p-8 overflow-y-auto font-serif text-gray-200 text-sm md:text-base leading-relaxed whitespace-pre-wrap">${escapeHTML(trimmed)}</div>`;
+            return `<div class="w-full ${isVertical ? 'h-auto' : 'h-full'} p-8 overflow-y-auto font-serif text-gray-200 text-sm md:text-base leading-relaxed whitespace-pre-wrap">${escapeHTML(trimmed)}</div>`;
         }
 
         function escapeHTML(str) {
@@ -702,36 +737,80 @@
             }[tag] || tag));
         }
 
-        function updateReaderUI() {
-            const papers = document.querySelectorAll('.paper');
-            const totalLeaves = papers.length;
-
-            papers.forEach((paper, idx) => {
-                if (idx < currentPageIndex) {
-                    paper.classList.add('flipped');
-                    paper.style.zIndex = idx + 1; // Flipped left stack order
-                } else {
-                    paper.classList.remove('flipped');
-                    paper.style.zIndex = totalLeaves - idx; // Unflipped right stack order
+        function initVerticalObserver() {
+            const pages = document.querySelectorAll('.vert-page');
+            const observer = new IntersectionObserver((entries) => {
+                let visiblePages = [];
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        visiblePages.push(parseInt(entry.target.getAttribute('data-idx')));
+                    }
+                });
+                
+                if (visiblePages.length > 0) {
+                    currentVerticalPage = Math.min(...visiblePages);
+                    if (isMobileReadingMode) {
+                        document.getElementById('reader-page-indicator').innerText = `Page ${currentVerticalPage + 1} of ${pages.length}`;
+                    }
                 }
-            });
+            }, { threshold: 0.2 });
+            
+            pages.forEach(p => observer.observe(p));
+        }
 
-            document.getElementById('reader-page-indicator').innerText = `Spread ${currentPageIndex + 1} of ${totalLeaves}`;
+        function updateReaderUI() {
+            if (isMobileReadingMode) {
+                const totalPages = document.querySelectorAll('.vert-page').length;
+                document.getElementById('reader-page-indicator').innerText = `Page ${currentVerticalPage + 1} of ${totalPages}`;
+            } else {
+                const papers = document.querySelectorAll('.paper');
+                const totalLeaves = papers.length;
+
+                papers.forEach((paper, idx) => {
+                    if (idx < currentPageIndex) {
+                        paper.classList.add('flipped');
+                        paper.style.zIndex = idx + 1; // Flipped left stack order
+                    } else {
+                        paper.classList.remove('flipped');
+                        paper.style.zIndex = totalLeaves - idx; // Unflipped right stack order
+                    }
+                });
+
+                document.getElementById('reader-page-indicator').innerText = `Spread ${currentPageIndex + 1} of ${totalLeaves}`;
+            }
             updateBookmarkButtonState();
         }
 
         function nextPage() {
-            const papers = document.querySelectorAll('.paper');
-            if (currentPageIndex < papers.length) {
-                currentPageIndex++;
-                updateReaderUI();
+            if (isMobileReadingMode) {
+                const pages = document.querySelectorAll('.vert-page');
+                if (currentVerticalPage < pages.length - 1) {
+                    currentVerticalPage++;
+                    pages[currentVerticalPage].scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    updateReaderUI();
+                }
+            } else {
+                const papers = document.querySelectorAll('.paper');
+                if (currentPageIndex < papers.length) {
+                    currentPageIndex++;
+                    updateReaderUI();
+                }
             }
         }
 
         function prevPage() {
-            if (currentPageIndex > 0) {
-                currentPageIndex--;
-                updateReaderUI();
+            if (isMobileReadingMode) {
+                if (currentVerticalPage > 0) {
+                    currentVerticalPage--;
+                    const pages = document.querySelectorAll('.vert-page');
+                    pages[currentVerticalPage].scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    updateReaderUI();
+                }
+            } else {
+                if (currentPageIndex > 0) {
+                    currentPageIndex--;
+                    updateReaderUI();
+                }
             }
         }
 
@@ -748,8 +827,13 @@
             const finalScale = Math.max(0.15, baseFitScale * userZoomLevel);
             
             const bookEl = document.getElementById('book');
-            if (bookEl) {
+            if (bookEl && !isMobileReadingMode) {
                 bookEl.style.transform = `scale(${finalScale}) translate(${panX}px, ${panY}px)`;
+            }
+
+            const verticalEl = document.getElementById('vertical-reader-view');
+            if (verticalEl && isMobileReadingMode) {
+                verticalEl.style.transform = `scale(${userZoomLevel}) translate(${panX}px, ${panY}px)`;
             }
             
             const zoomText = document.getElementById('zoom-level-text');
@@ -787,6 +871,15 @@
             const viewArea = document.getElementById('desktop-3d-view');
             if (!viewArea) return;
 
+            let initialPinchDistance = null;
+            let initialZoom = 1.0;
+
+            function getDistance(touches) {
+                const dx = touches[0].clientX - touches[1].clientX;
+                const dy = touches[0].clientY - touches[1].clientY;
+                return Math.sqrt(dx * dx + dy * dy);
+            }
+
             // Mouse Drag Pan
             viewArea.addEventListener('mousedown', (e) => {
                 if (e.target.closest('button') || e.target.closest('input')) return;
@@ -806,34 +899,42 @@
                 isPanning = false;
             });
 
-            // Touch Drag Pan
+            // Touch Drag Pan & Pinch Zoom
             viewArea.addEventListener('touchstart', (e) => {
+                if (e.target.closest('button') || e.target.closest('input')) return;
+                
                 if (e.touches.length === 1) {
-                    if (e.target.closest('button') || e.target.closest('input')) return;
                     isPanning = true;
                     startX = e.touches[0].clientX - panX;
                     startY = e.touches[0].clientY - panY;
+                } else if (e.touches.length === 2) {
+                    isPanning = false; // Stop panning when zooming
+                    initialPinchDistance = getDistance(e.touches);
+                    initialZoom = userZoomLevel;
                 }
             }, { passive: true });
 
             window.addEventListener('touchmove', (e) => {
-                if (!isPanning || e.touches.length !== 1) return;
-                panX = e.touches[0].clientX - startX;
-                panY = e.touches[0].clientY - startY;
-                updateBookTransform();
+                if (e.touches.length === 1 && isPanning) {
+                    panX = e.touches[0].clientX - startX;
+                    panY = e.touches[0].clientY - startY;
+                    updateBookTransform();
+                } else if (e.touches.length === 2 && initialPinchDistance) {
+                    const currentDistance = getDistance(e.touches);
+                    const scale = currentDistance / initialPinchDistance;
+                    userZoomLevel = Math.min(3.0, Math.max(0.4, initialZoom * scale));
+                    updateBookTransform();
+                }
             }, { passive: true });
 
-            window.addEventListener('touchend', () => {
-                isPanning = false;
+            window.addEventListener('touchend', (e) => {
+                if (e.touches.length < 2) {
+                    initialPinchDistance = null;
+                }
+                if (e.touches.length === 0) {
+                    isPanning = false;
+                }
             });
-
-            // Mouse Wheel Zoom
-            viewArea.addEventListener('wheel', (e) => {
-                if (document.getElementById('view-reader').classList.contains('hidden')) return;
-                e.preventDefault();
-                const delta = e.deltaY < 0 ? 0.1 : -0.1;
-                changeZoom(delta);
-            }, { passive: false });
 
             // Window Resize
             window.addEventListener('resize', () => {
@@ -845,8 +946,21 @@
         // Keyboard navigation
         document.addEventListener('keydown', (e) => {
             if (document.getElementById('view-reader').classList.contains('hidden')) return;
-            if (e.key === 'ArrowRight') nextPage();
-            if (e.key === 'ArrowLeft') prevPage();
+            
+            // Allow input typing (e.g. search box or publish modal)
+            if (e.target.tagName.toLowerCase() === 'input' || e.target.tagName.toLowerCase() === 'textarea') return;
+
+            if (e.key === 'ArrowRight') {
+                e.preventDefault();
+                nextPage();
+            } else if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                prevPage();
+            } else if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+                // Explicitly prevent Up/Down arrows from scrolling the view natively,
+                // forcing the use of left/right pagination instead as requested.
+                e.preventDefault();
+            }
         });
 
         // --- Fullscreen Toggle with Fallback ---
@@ -892,8 +1006,7 @@
         });
 
         // --- Mobile View Toggle ---
-        function toggleMobileMode() {
-            isMobileReadingMode = !isMobileReadingMode;
+        function applyReadingMode() {
             const desktopView = document.getElementById('desktop-3d-view');
             const verticalView = document.getElementById('vertical-reader-view');
             const btn = document.getElementById('mobile-mode-btn');
@@ -908,6 +1021,12 @@
                 btn.classList.remove('bg-gold/20', 'text-gold');
                 updateBookTransform();
             }
+            updateReaderUI();
+        }
+
+        function toggleMobileMode() {
+            isMobileReadingMode = !isMobileReadingMode;
+            applyReadingMode();
         }
 
         // --- Bookmarks Management ---
@@ -994,7 +1113,7 @@
             });
         }
 
-        let isRegisterMode = false;
+        var isRegisterMode = false;
         function toggleAuthMode() {
             isRegisterMode = !isRegisterMode;
             document.getElementById('auth-title').innerText = isRegisterMode ? 'Create Account' : 'Log In to Ink & Light';
@@ -1039,7 +1158,11 @@
 
         async function submitBook() {
             const title = document.getElementById('pub-title').value;
-            const genre = document.getElementById('pub-genre').value;
+            
+            const selectedPills = document.querySelectorAll('.selected-genre');
+            const genresList = Array.from(selectedPills).map(pill => pill.innerText).join(', ');
+            const genre = genresList || 'General';
+
             const coverUrl = document.getElementById('pub-cover').value || 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=600&q=80';
             
             // Gather all page inputs dynamically
@@ -1085,6 +1208,7 @@
             // Reset modal inputs for next use
             document.getElementById('pub-title').value = '';
             document.getElementById('pub-cover').value = '';
+            document.querySelectorAll('.selected-genre').forEach(pill => toggleGenre(pill));
             document.getElementById('pub-pages-container').innerHTML = `
                 <div class="flex items-start space-x-2 page-input-row">
                     <span class="text-xs text-gray-500 font-mono w-4 pt-3 page-number">1.</span>
@@ -1131,12 +1255,12 @@
             updateGrid(filtered);
         }
 
-        function filterCategory(genre) {
-            if (genre === 'All') {
+        function filterCategory(category) {
+            if (category === 'All') {
                 renderHomeCatalog();
                 return;
             }
-            const filtered = books.filter(b => b.genre.toLowerCase() === genre.toLowerCase());
+            const filtered = books.filter(b => b.genre.toLowerCase().includes(category.toLowerCase()));
             updateGrid(filtered);
         }
 
