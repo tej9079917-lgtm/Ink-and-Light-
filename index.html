@@ -113,8 +113,64 @@
 
         .book-card:hover { transform: translateY(-6px); box-shadow: 0 12px 28px rgba(210, 168, 94, 0.3); border-color: #d2a85e; }
         .book-card img { aspect-ratio: 2/3; object-fit: cover; }
-        .grab-cursor { cursor: grab; }
-        .grab-cursor:active { cursor: grabbing; }
+        
+        /* Updated Page Navigation Button Styles */
+        .nav-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 50px;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: transparent;
+            color: rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+            z-index: 40;
+            border: none;
+            cursor: pointer;
+        }
+        .nav-btn:hover {
+            color: rgba(210, 168, 94, 0.8);
+            background: linear-gradient(to right, rgba(0,0,0,0.4), transparent);
+        }
+        .nav-btn.next:hover {
+            background: linear-gradient(to left, rgba(0,0,0,0.4), transparent);
+        }
+        .nav-btn i {
+            font-size: 2rem;
+            filter: drop-shadow(0 0 8px rgba(0,0,0,0.8));
+        }
+
+        /* 3D Transform Container for Pan/Zoom */
+        #book-transform-wrap {
+            transition: transform 0.1s ease-out; /* Smooth transitions for mouse wheel */
+            will-change: transform;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+        }
+        /* Disable transition during active drag/pinch for immediate response */
+        .is-dragging #book-transform-wrap {
+            transition: none;
+        }
+
+        /* LIGHT MODE OVERRIDES */
+        body.light-theme { background-color: #f3f4f6; color: #111827; }
+        body.light-theme .text-white { color: #111827 !important; }
+        body.light-theme .text-gray-400, body.light-theme .text-gray-500 { color: #4b5563 !important; }
+        body.light-theme .bg-black\/40, body.light-theme .bg-black\/20 { background-color: rgba(255, 255, 255, 0.7) !important; }
+        body.light-theme .bg-black\/80, body.light-theme .bg-black\/95 { background-color: rgba(255, 255, 255, 0.95) !important; }
+        body.light-theme .bg-neutral-900, body.light-theme .bg-black\/50 { background-color: #ffffff !important; }
+        body.light-theme .border-white\/10, body.light-theme .border-white\/20 { border-color: rgba(0, 0, 0, 0.1) !important; }
+        body.light-theme .forest-bg { background: radial-gradient(circle at 50% 30%, #e2e8f0 0%, #f3f4f6 70%); }
+        body.light-theme .bg-gradient-to-r { background: linear-gradient(to right, #f8fafc, #f1f5f9, #e2e8f0) !important; }
+        body.light-theme .bg-white\/5 { background-color: rgba(0, 0, 0, 0.05) !important; }
+        body.light-theme .hover\:bg-white\/10:hover { background-color: rgba(0, 0, 0, 0.1) !important; }
+
     </style>
 </head>
 <body class="h-screen w-screen overflow-hidden relative">
@@ -140,10 +196,6 @@
 
             <!-- Header Actions -->
             <div class="flex items-center space-x-2 md:space-x-4">
-                <button onclick="openSyncModal()" class="hidden md:flex items-center space-x-2 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 hover:bg-gold/10 hover:border-gold/30 transition text-xs text-gray-300">
-                    <i class="fa-solid fa-cloud-arrow-down text-gold"></i>
-                    <span>Sync Google Doc</span>
-                </button>
                 <button onclick="openPublishModal()" class="flex items-center space-x-1 md:space-x-2 px-3 py-1.5 md:px-4 md:py-2 rounded-lg bg-gold text-black font-semibold hover:bg-darkgold transition text-[10px] md:text-xs shadow-lg shadow-gold/10">
                     <i class="fa-solid fa-plus"></i>
                     <span class="hidden sm:inline">Publish Book</span>
@@ -160,7 +212,7 @@
             <div id="sidebar-overlay" onclick="toggleSidebar()" class="absolute inset-0 bg-black/60 backdrop-blur-sm z-30 hidden md:hidden"></div>
 
             <!-- SIDEBAR NAVIGATION -->
-            <nav id="sidebar" class="absolute md:relative z-40 h-full w-64 border-r border-white/10 bg-black/95 md:bg-black/20 backdrop-blur-md flex flex-col justify-between p-4 transition-transform duration-300 transform -translate-x-full md:translate-x-0">
+            <nav id="sidebar" class="absolute md:relative z-40 h-full w-64 border-r border-white/10 bg-black/95 md:bg-black/20 backdrop-blur-md flex flex-col justify-between p-4 transition-transform duration-300 transform -translate-x-full md:translate-x-0 overflow-y-auto">
                 <div class="space-y-6">
                     <div>
                         <p class="text-[10px] uppercase font-semibold text-gray-500 tracking-wider px-3 mb-2">Navigation</p>
@@ -196,7 +248,7 @@
                     </div>
                 </div>
 
-                <div class="pt-4 border-t border-white/10">
+                <div class="pt-4 mt-6 border-t border-white/10 shrink-0">
                     <button onclick="switchView('view-settings')" class="sidebar-btn w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-gray-400 hover:text-white hover:bg-white/5 text-sm font-medium transition">
                         <i class="fa-solid fa-gear w-5"></i>
                         <span>Settings</span>
@@ -204,19 +256,19 @@
                 </div>
             </nav>
 
-            <!-- MAIN MAIN CONTENT AREA -->
-            <main class="flex-1 relative overflow-hidden flex flex-col w-full">
+            <!-- MAIN CONTENT AREA -->
+            <main class="flex-1 relative overflow-hidden flex flex-col w-full h-full">
 
                 <!-- 1. HOME VIEW -->
-                <div id="view-home" class="view-panel absolute inset-0 overflow-y-auto p-4 md:p-8 flex flex-col space-y-6 md:space-y-8">
+                <div id="view-home" class="view-panel absolute inset-0 overflow-y-auto p-4 md:p-8 flex flex-col space-y-6 md:space-y-8 pb-20">
                     <!-- Hero Banner -->
-                    <div class="relative rounded-3xl bg-gradient-to-r from-neutral-900 via-stone-900 to-zinc-900 border border-gold/20 p-5 md:p-12 overflow-hidden shadow-2xl">
+                    <div class="relative rounded-3xl bg-gradient-to-r from-neutral-900 via-stone-900 to-zinc-900 border border-gold/20 p-6 md:p-12 overflow-hidden shadow-2xl shrink-0 min-h-fit">
                         <div class="absolute right-0 top-0 w-1/3 h-full opacity-10 bg-[radial-gradient(#d2a85e_1px,transparent_1px)] [background-size:16px_16px]"></div>
-                        <div class="relative z-10 max-w-2xl space-y-3 md:space-y-4">
-                            <span class="px-3 py-1 rounded-full bg-gold/10 border border-gold/30 text-gold text-[10px] md:text-xs font-semibold uppercase tracking-wider">Immersive Reading</span>
+                        <div class="relative z-10 max-w-2xl space-y-4 md:space-y-5">
+                            <div><span class="px-3 py-1 rounded-full bg-gold/10 border border-gold/30 text-gold text-[10px] md:text-xs font-semibold uppercase tracking-wider">Immersive Reading</span></div>
                             <h2 class="font-serif text-2xl md:text-5xl font-bold tracking-tight text-white leading-tight">Experience Stories in True 3D A4 Elegance</h2>
-                            <p class="text-gray-400 text-xs md:text-base">Upload your manga, novels, or notes, and read them with realistic page turns, full-bleed clarity, smooth zooming, and drag-to-scroll controls.</p>
-                            <div class="pt-2 flex flex-col sm:flex-row sm:items-center space-y-3 sm:space-y-0 sm:space-x-4">
+                            <p class="text-gray-400 text-xs md:text-base leading-relaxed">Upload your manga, novels, or notes, and read them with realistic page turns, full-bleed clarity, smooth zooming, and drag-to-scroll controls.</p>
+                            <div class="pt-3 flex flex-col sm:flex-row sm:items-center space-y-3 sm:space-y-0 sm:space-x-4">
                                 <button onclick="switchView('view-library')" class="w-full sm:w-auto px-6 py-3 rounded-xl bg-gold text-black font-semibold hover:bg-darkgold transition shadow-lg shadow-gold/20 flex items-center justify-center space-x-2">
                                     <i class="fa-solid fa-book-open"></i>
                                     <span>Explore Library</span>
@@ -240,13 +292,13 @@
                     </div>
 
                     <!-- Books Grid -->
-                    <div id="books-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6 pb-12">
+                    <div id="books-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6">
                         <!-- Populated dynamically -->
                     </div>
                 </div>
 
                 <!-- 2. BROWSE CATALOG VIEW -->
-                <div id="view-library" class="view-panel absolute inset-0 overflow-y-auto p-4 md:p-8 hidden flex-col space-y-4 md:space-y-6">
+                <div id="view-library" class="view-panel absolute inset-0 overflow-y-auto p-4 md:p-8 hidden flex-col space-y-4 md:space-y-6 pb-20">
                     <div class="flex items-center justify-between">
                         <div>
                             <h3 class="font-serif text-xl md:text-2xl font-bold text-white">Complete Library Catalog</h3>
@@ -268,11 +320,34 @@
 
                 <!-- 4. SETTINGS VIEW -->
                 <div id="view-settings" class="view-panel absolute inset-0 overflow-y-auto p-4 md:p-8 hidden flex-col space-y-4 md:space-y-6 max-w-2xl">
-                    <h3 class="font-serif text-xl md:text-2xl font-bold text-white">Reader Settings</h3>
+                    <h3 class="font-serif text-xl md:text-2xl font-bold text-white">Settings</h3>
+                    
+                    <!-- Account & Authentication -->
                     <div class="space-y-4 bg-black/30 border border-white/10 rounded-2xl p-6">
+                        <h4 class="font-semibold text-sm text-white border-b border-white/10 pb-3 mb-3">Account</h4>
+                        <div id="settings-auth-container">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+
+                    <!-- Appearance -->
+                    <div class="space-y-4 bg-black/30 border border-white/10 rounded-2xl p-6">
+                        <h4 class="font-semibold text-sm text-white border-b border-white/10 pb-3 mb-3">Appearance</h4>
+                        
                         <div class="flex items-center justify-between">
                             <div>
-                                <h4 class="font-semibold text-sm text-white">Ambient Firefly Particles</h4>
+                                <h4 class="font-medium text-sm text-white">App Theme</h4>
+                                <p class="text-xs text-gray-400">Switch between Light and Dark mode.</p>
+                            </div>
+                            <div class="flex bg-black/50 border border-white/10 rounded-lg p-1">
+                                <button onclick="setTheme('dark')" id="theme-btn-dark" class="px-3 py-1.5 rounded-md bg-white/10 text-xs text-white transition">Dark</button>
+                                <button onclick="setTheme('light')" id="theme-btn-light" class="px-3 py-1.5 rounded-md text-xs text-gray-400 hover:text-white transition">Light</button>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-between mt-4">
+                            <div>
+                                <h4 class="font-medium text-sm text-white">Ambient Firefly Particles</h4>
                                 <p class="text-xs text-gray-400">Toggle floating background lights in the reader.</p>
                             </div>
                             <input type="checkbox" id="setting-fireflies" checked onchange="toggleFireflies(this)" class="w-4 h-4 accent-gold cursor-pointer">
@@ -293,8 +368,8 @@
                             <span id="reader-page-indicator" class="text-[10px] text-gold tracking-widest uppercase">Spread 1 of 1</span>
                         </div>
                         <div class="flex items-center space-x-3">
-                            <button onclick="toggleMobileMode()" id="mobile-mode-btn" title="Toggle Vertical Reader Mode" class="px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 text-xs text-gray-300 transition">
-                                <i class="fa-solid fa-mobile-screen"></i> <span class="hidden md:inline">Vertical Mode</span>
+                            <button onclick="resetZoomPan()" class="w-8 h-8 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 text-xs text-gray-300 transition flex items-center justify-center" title="Reset View">
+                                <i class="fa-solid fa-compress"></i>
                             </button>
                             <button onclick="toggleFullscreen()" id="fullscreen-btn" class="px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 text-xs text-gray-300 transition flex items-center space-x-1.5">
                                 <i class="fa-solid fa-expand"></i> <span class="hidden md:inline">Full Screen</span>
@@ -306,69 +381,28 @@
                     </div>
 
                     <!-- Reader Interactive Canvas / Container -->
-                    <div id="desktop-3d-view" class="book-section flex-1 relative overflow-hidden p-4 grab-cursor" style="touch-action: none;">
-                        <!-- 3D Book Container -->
-                        <div id="book" class="book">
-                            <!-- Pages are dynamically generated here -->
-                        </div>
-                    </div>
-
-                    <!-- Vertical Reader Container (Fallback Mode) -->
-                    <div id="vertical-reader-view" class="hidden w-full flex-1 overflow-y-auto p-4 md:p-6 pb-40 max-w-4xl mx-auto space-y-4 scroll-smooth" style="transform-origin: top center; transition: transform 0.2s ease-out;">
-                        <!-- Dynamically populated vertical pages -->
-                    </div>
-
-                    <!-- Unified Reader Bottom Navigation & Controls -->
-                    <div class="absolute bottom-0 left-0 w-full border-t border-white/10 bg-black/90 backdrop-blur-md z-40 flex flex-row items-center justify-between p-3 md:px-8 md:py-4 shadow-[0_-10px_40px_rgba(0,0,0,0.5)] gap-2 md:gap-6">
+                    <div class="flex-1 relative overflow-hidden flex items-center justify-center" id="reader-container-wrap">
                         
-                        <!-- Left: Prev Page -->
-                        <button onclick="prevPage()" class="shrink-0 w-10 h-10 md:w-12 md:h-12 rounded-full bg-white/5 border border-white/10 hover:bg-gold/20 hover:border-gold/50 text-gold flex items-center justify-center transition shadow-lg">
-                            <i class="fa-solid fa-chevron-left text-lg"></i>
+                        <!-- Left Navigation Button -->
+                        <button onclick="prevPage()" class="nav-btn left-0" title="Previous Page">
+                            <i class="fa-solid fa-chevron-left"></i>
                         </button>
 
-                        <!-- Center: Controls Container -->
-                        <div class="flex-1 flex justify-center overflow-x-auto custom-scrollbar pb-1 md:pb-0">
-                            <div class="flex items-center space-x-2 md:space-x-4 text-white select-none bg-white/5 border border-white/10 rounded-2xl p-1.5 md:p-2 min-w-max">
-                                <!-- Zoom Controls -->
-                                <div class="flex items-center space-x-1">
-                                    <button onclick="changeZoom(-0.15)" class="w-8 h-8 rounded-xl bg-white/10 hover:bg-gold/20 hover:text-gold flex items-center justify-center transition" title="Zoom Out (-)">
-                                        <i class="fa-solid fa-minus text-xs"></i>
-                                    </button>
-                                    <span id="zoom-level-text" class="text-xs font-mono w-12 text-center text-gold font-bold">100%</span>
-                                    <button onclick="changeZoom(0.15)" class="w-8 h-8 rounded-xl bg-white/10 hover:bg-gold/20 hover:text-gold flex items-center justify-center transition" title="Zoom In (+)">
-                                        <i class="fa-solid fa-plus text-xs"></i>
-                                    </button>
-                                    <button onclick="resetZoom()" class="px-2.5 py-1.5 rounded-xl bg-white/10 hover:bg-gold/20 hover:text-gold text-xs font-medium transition flex items-center space-x-1" title="Fit to Screen">
-                                        <i class="fa-solid fa-compress-arrows-alt text-xs"></i>
-                                        <span class="hidden sm:inline">Fit</span>
-                                    </button>
-                                </div>
-
-                                <div class="h-8 w-px bg-white/20"></div>
-
-                                <!-- Directional D-Pad Pan Controls -->
-                                <div class="flex items-center space-x-2">
-                                    <span class="text-[10px] text-gray-400 font-medium hidden md:inline uppercase tracking-wider">Pan:</span>
-                                    <div class="grid grid-cols-3 gap-0.5 w-16 h-16 bg-black/40 border border-white/10 rounded-xl p-1 items-center justify-center">
-                                        <div></div>
-                                        <button onclick="panBook(0, 60)" class="h-4 flex items-center justify-center text-gray-300 hover:text-gold transition" title="Pan Up"><i class="fa-solid fa-caret-up text-xs"></i></button>
-                                        <div></div>
-                                        <button onclick="panBook(60, 0)" class="h-4 flex items-center justify-center text-gray-300 hover:text-gold transition" title="Pan Left"><i class="fa-solid fa-caret-left text-xs"></i></button>
-                                        <button onclick="resetPan()" class="h-4 flex items-center justify-center text-gold transition" title="Center View"><i class="fa-solid fa-crosshairs text-[10px]"></i></button>
-                                        <button onclick="panBook(-60, 0)" class="h-4 flex items-center justify-center text-gray-300 hover:text-gold transition" title="Pan Right"><i class="fa-solid fa-caret-right text-xs"></i></button>
-                                        <div></div>
-                                        <button onclick="panBook(0, -60)" class="h-4 flex items-center justify-center text-gray-300 hover:text-gold transition" title="Pan Down"><i class="fa-solid fa-caret-down text-xs"></i></button>
-                                        <div></div>
-                                    </div>
+                        <div id="desktop-3d-view" class="book-section flex-1 relative overflow-hidden" style="touch-action: none; cursor: grab;">
+                            <div id="book-transform-wrap">
+                                <!-- 3D Book Container -->
+                                <div id="book" class="book">
+                                    <!-- Pages are dynamically generated here -->
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Right: Next Page -->
-                        <button onclick="nextPage()" class="shrink-0 w-10 h-10 md:w-12 md:h-12 rounded-full bg-white/5 border border-white/10 hover:bg-gold/20 hover:border-gold/50 text-gold flex items-center justify-center transition shadow-lg">
-                            <i class="fa-solid fa-chevron-right text-lg"></i>
+                        <!-- Right Navigation Button -->
+                        <button onclick="nextPage()" class="nav-btn right-0 next" title="Next Page">
+                            <i class="fa-solid fa-chevron-right"></i>
                         </button>
                     </div>
+
                 </div>
 
             </main>
@@ -377,16 +411,48 @@
 
     <!-- PUBLISH BOOK MODAL -->
     <div id="publish-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-neutral-900 border border-white/10 rounded-3xl w-full max-w-xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
+        <div class="bg-neutral-900 border border-white/10 rounded-3xl w-full max-w-2xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
             <div class="p-6 border-b border-white/10 flex items-center justify-between">
                 <h3 class="font-serif font-bold text-lg text-white">Publish a Book or Manga</h3>
                 <button onclick="closePublishModal()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
-            <div class="p-6 overflow-y-auto space-y-4 flex-1">
-                <div>
-                    <label class="block text-xs font-medium text-gray-400 mb-1">Book Title</label>
-                    <input type="text" id="pub-title" placeholder="e.g. Mister Romeo - Special Edition" class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-gold">
+            <div class="p-6 overflow-y-auto space-y-5 flex-1 custom-scrollbar">
+                
+                <!-- Book Information Fields -->
+                <div class="space-y-4 bg-white/5 p-4 rounded-2xl border border-white/10">
+                    <h4 class="text-[10px] font-bold text-gold uppercase tracking-wider">Book Information</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-medium text-gray-400 mb-1">Book Title *</label>
+                            <input type="text" id="pub-title" placeholder="e.g. Mister Romeo" class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-gold">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-400 mb-1">Subtitle</label>
+                            <input type="text" id="pub-subtitle" placeholder="e.g. Special Edition (Optional)" class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-gold">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-medium text-gray-400 mb-1">Author Name *</label>
+                            <input type="text" id="pub-author" placeholder="Real name or pen name" class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-gold">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-400 mb-1">Keywords</label>
+                            <input type="text" id="pub-keywords" placeholder="e.g. romance, fantasy" class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-gold">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-400 mb-1">Book Description</label>
+                        <textarea id="pub-desc" rows="2" placeholder="A short summary or blurb to attract readers..." class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-gold resize-y"></textarea>
+                    </div>
+                    <div>
+                        <label class="flex items-center space-x-2 cursor-pointer mt-1">
+                            <input type="checkbox" id="pub-copyright" checked class="w-4 h-4 accent-gold cursor-pointer rounded border-white/20">
+                            <span class="text-xs text-gray-400 hover:text-white transition">Auto-generate standard Copyright Page (Page 2)</span>
+                        </label>
+                    </div>
                 </div>
+
                 <div class="grid grid-cols-1 gap-4">
                     <div>
                         <label class="block text-xs font-medium text-gray-400 mb-2">Genres (Select multiple)</label>
@@ -478,6 +544,7 @@
     </div>
 
     <script>
+        // --- STREAMING_CHUNK:Initializing JavaScript Application State... ---
         // Live Google Apps Script API Endpoint
         var API_URL = 'https://script.google.com/macros/s/AKfycbzhRZm0qBCQv7wjvbeuCZBY4sNY_wNFXz0HeLcZLmh9tP0ZJZDxpzdMoYa8l36Yg0j-6A/exec';
 
@@ -535,16 +602,21 @@
         var bookmarks = [];
         var currentBook = null;
         var currentPageIndex = 0; // Spread index
-        var currentVerticalPage = 0; // Vertical page index
-        var isMobileReadingMode = false;
         var isPseudoFullscreen = false;
 
-        // --- Zoom & Pan Engine State ---
-        var userZoomLevel = 1.0;
-        var panX = 0;
-        var panY = 0;
-        var isPanning = false;
-        var startX = 0, startY = 0;
+        // Zoom and Pan State
+        let currentScale = 1;
+        let baseFitScale = 1; // The calculated fit scale to return to
+        let currentPanX = 0;
+        let currentPanY = 0;
+        let isDragging = false;
+        let dragStartX = 0;
+        let dragStartY = 0;
+        let initialPanX = 0;
+        let initialPanY = 0;
+        // Touch state
+        let initialPinchDistance = null;
+        let initialPinchScale = 1;
 
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
@@ -582,6 +654,7 @@
             closeSidebarOnMobile();
         }
 
+        // --- STREAMING_CHUNK:Rendering library catalog... ---
         function renderHomeCatalog() {
             const grid = document.getElementById('books-grid');
             const fullGrid = document.getElementById('full-books-grid');
@@ -618,25 +691,17 @@
             if (!currentBook) return;
 
             currentPageIndex = 0;
-            currentVerticalPage = 0;
-            resetZoom();
             document.getElementById('reader-book-title').innerText = currentBook.title;
             switchView('view-reader');
             buildBookDOM();
             
-            // Auto-switch to vertical on mobile
-            if (window.innerWidth < 768) {
-                isMobileReadingMode = true;
-            } else {
-                isMobileReadingMode = false;
-            }
-            applyReadingMode();
-            
             updateReaderUI();
-            initVerticalObserver();
             
             // Allow container layout before sizing transform
-            setTimeout(updateBookTransform, 50);
+            setTimeout(() => {
+                calculateBaseFit();
+                resetZoomPan();
+            }, 50);
         }
 
         function closeReader() {
@@ -659,24 +724,15 @@
             }
         }
 
-        // --- STREAMING_CHUNK:Building book leaves and link rendering logic... ---
+        // --- STREAMING_CHUNK:Building book leaves and scaling logic... ---
         function buildBookDOM() {
             const bookEl = document.getElementById('book');
-            const verticalEl = document.getElementById('vertical-reader-view');
             
             let totalPages = [...currentBook.pages];
             // Ensure even count for spread layout
             if (totalPages.length % 2 !== 0) {
                 totalPages.push("");
             }
-
-            // Build Vertical View
-            verticalEl.innerHTML = totalPages.map((pageContent, idx) => `
-                <div id="vert-page-${idx}" data-idx="${idx}" class="vert-page relative w-full max-w-4xl mx-auto flex flex-col items-center justify-center mb-4 bg-neutral-900 border border-white/5 rounded-2xl overflow-hidden shadow-2xl">
-                    <span class="absolute top-4 right-4 text-xs text-white bg-black/70 px-2 py-1 rounded z-20">Page ${idx + 1}</span>
-                    <div class="w-full flex items-center justify-center">${renderPageContent(pageContent, true)}</div>
-                </div>
-            `).join('');
 
             // Build 3D Spread Leaves
             // Leaf i handles Page 2i (front, unflipped right side) and Page 2i+1 (back, flipped left side)
@@ -712,15 +768,15 @@
         }
 
         // --- Page Content & Link Parser ---
-        function renderPageContent(content, isVertical = false) {
+        function renderPageContent(content) {
             if (!content || !content.trim()) {
                 return '<div class="flex items-center justify-center h-full w-full text-gray-600 italic font-serif text-sm">Blank Page</div>';
             }
             
             let trimmed = content.trim();
 
-            const imgClass = isVertical ? "w-full h-auto object-contain block" : "w-full h-full object-contain pointer-events-none select-none";
-            const containerClass = isVertical ? "w-full flex items-center justify-center bg-black/10" : "w-full h-full relative flex items-center justify-center bg-black/40 overflow-hidden";
+            const imgClass = "w-full h-full object-contain pointer-events-none select-none";
+            const containerClass = "w-full h-full relative flex items-center justify-center bg-black/40 overflow-hidden";
 
             // 1. Direct Image URL or Data URI
             if (/^(https?:\/\/|data:image\/).+/i.test(trimmed) && !trimmed.includes('\n') && !trimmed.includes(' ')) {
@@ -749,11 +805,11 @@
 
             // 3. HTML Content Tag
             if (/<[a-z][\s\S]*>/i.test(trimmed)) {
-                return `<div class="w-full ${isVertical ? 'h-auto' : 'h-full'} p-6 overflow-y-auto font-serif text-gray-200 leading-relaxed text-sm">${trimmed}</div>`;
+                return `<div class="w-full h-full p-6 overflow-y-auto font-serif text-gray-200 leading-relaxed text-sm">${trimmed}</div>`;
             }
 
             // 4. Formatted Plain Text
-            return `<div class="w-full ${isVertical ? 'h-auto' : 'h-full'} p-8 overflow-y-auto font-serif text-gray-200 text-sm md:text-base leading-relaxed whitespace-pre-wrap">${escapeHTML(trimmed)}</div>`;
+            return `<div class="w-full h-full p-8 overflow-y-auto font-serif text-gray-200 text-sm md:text-base leading-relaxed whitespace-pre-wrap">${escapeHTML(trimmed)}</div>`;
         }
 
         function escapeHTML(str) {
@@ -766,85 +822,41 @@
             }[tag] || tag));
         }
 
-        function initVerticalObserver() {
-            const pages = document.querySelectorAll('.vert-page');
-            const observer = new IntersectionObserver((entries) => {
-                let visiblePages = [];
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        visiblePages.push(parseInt(entry.target.getAttribute('data-idx')));
-                    }
-                });
-                
-                if (visiblePages.length > 0) {
-                    currentVerticalPage = Math.min(...visiblePages);
-                    if (isMobileReadingMode) {
-                        document.getElementById('reader-page-indicator').innerText = `Page ${currentVerticalPage + 1} of ${pages.length}`;
-                    }
-                }
-            }, { threshold: 0.2 });
-            
-            pages.forEach(p => observer.observe(p));
-        }
-
         function updateReaderUI() {
-            if (isMobileReadingMode) {
-                const totalPages = document.querySelectorAll('.vert-page').length;
-                document.getElementById('reader-page-indicator').innerText = `Page ${currentVerticalPage + 1} of ${totalPages}`;
-            } else {
-                const papers = document.querySelectorAll('.paper');
-                const totalLeaves = papers.length;
+            const papers = document.querySelectorAll('.paper');
+            const totalLeaves = papers.length;
 
-                papers.forEach((paper, idx) => {
-                    if (idx < currentPageIndex) {
-                        paper.classList.add('flipped');
-                        paper.style.zIndex = idx + 1; // Flipped left stack order
-                    } else {
-                        paper.classList.remove('flipped');
-                        paper.style.zIndex = totalLeaves - idx; // Unflipped right stack order
-                    }
-                });
+            papers.forEach((paper, idx) => {
+                if (idx < currentPageIndex) {
+                    paper.classList.add('flipped');
+                    paper.style.zIndex = idx + 1; // Flipped left stack order
+                } else {
+                    paper.classList.remove('flipped');
+                    paper.style.zIndex = totalLeaves - idx; // Unflipped right stack order
+                }
+            });
 
-                document.getElementById('reader-page-indicator').innerText = `Spread ${currentPageIndex + 1} of ${totalLeaves}`;
-            }
+            document.getElementById('reader-page-indicator').innerText = `Spread ${currentPageIndex + 1} of ${totalLeaves}`;
             updateBookmarkButtonState();
         }
 
         function nextPage() {
-            if (isMobileReadingMode) {
-                const pages = document.querySelectorAll('.vert-page');
-                if (currentVerticalPage < pages.length - 1) {
-                    currentVerticalPage++;
-                    pages[currentVerticalPage].scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    updateReaderUI();
-                }
-            } else {
-                const papers = document.querySelectorAll('.paper');
-                if (currentPageIndex < papers.length) {
-                    currentPageIndex++;
-                    updateReaderUI();
-                }
+            const papers = document.querySelectorAll('.paper');
+            if (currentPageIndex < papers.length) {
+                currentPageIndex++;
+                updateReaderUI();
             }
         }
 
         function prevPage() {
-            if (isMobileReadingMode) {
-                if (currentVerticalPage > 0) {
-                    currentVerticalPage--;
-                    const pages = document.querySelectorAll('.vert-page');
-                    pages[currentVerticalPage].scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    updateReaderUI();
-                }
-            } else {
-                if (currentPageIndex > 0) {
-                    currentPageIndex--;
-                    updateReaderUI();
-                }
+            if (currentPageIndex > 0) {
+                currentPageIndex--;
+                updateReaderUI();
             }
         }
 
-        // --- STREAMING_CHUNK:Implementing Zoom & Pan Transform Controls... ---
-        function updateBookTransform() {
+        // --- STREAMING_CHUNK:Scale fitting to viewport... ---
+        function calculateBaseFit() {
             const container = document.getElementById('desktop-3d-view');
             if (!container) return;
             
@@ -852,125 +864,39 @@
             const containerHeight = container.clientHeight || window.innerHeight;
             
             // Base A4 spread proportions fit
-            const baseFitScale = Math.min((containerWidth * 0.92) / 1131, (containerHeight * 0.86) / 800);
-            const finalScale = Math.max(0.15, baseFitScale * userZoomLevel);
-            
+            baseFitScale = Math.min((containerWidth * 0.92) / 1131, (containerHeight * 0.86) / 800);
+            currentScale = baseFitScale;
+        }
+
+        function applyTransform() {
+            const transformWrap = document.getElementById('book-transform-wrap');
             const bookEl = document.getElementById('book');
-            if (bookEl && !isMobileReadingMode) {
-                bookEl.style.transform = `scale(${finalScale}) translate(${panX}px, ${panY}px)`;
-            }
-
-            const verticalEl = document.getElementById('vertical-reader-view');
-            if (verticalEl && isMobileReadingMode) {
-                verticalEl.style.transform = `scale(${userZoomLevel}) translate(${panX}px, ${panY}px)`;
-            }
-            
-            const zoomText = document.getElementById('zoom-level-text');
-            if (zoomText) {
-                zoomText.innerText = `${Math.round(userZoomLevel * 100)}%`;
+            if (transformWrap && bookEl) {
+                // Apply pan to the wrapper
+                transformWrap.style.transform = `translate(${currentPanX}px, ${currentPanY}px)`;
+                // Apply scale directly to the book to maintain 3D perspective context
+                bookEl.style.transform = `scale(${currentScale})`;
             }
         }
 
-        function changeZoom(delta) {
-            userZoomLevel = Math.min(3.0, Math.max(0.4, userZoomLevel + delta));
+        function resetZoomPan() {
+            calculateBaseFit();
+            currentPanX = 0;
+            currentPanY = 0;
+            applyTransform();
+        }
+
+        function updateBookTransform() {
+            // Re-calculate base fit on resize, but don't reset user's custom zoom/pan if they are active
+            // For now, simple resize resets view to ensure it stays in bounds nicely
+            calculateBaseFit();
+            resetZoomPan();
+        }
+
+        // Window Resize
+        window.addEventListener('resize', () => {
             updateBookTransform();
-        }
-
-        function resetZoom() {
-            userZoomLevel = 1.0;
-            panX = 0;
-            panY = 0;
-            updateBookTransform();
-        }
-
-        function panBook(dx, dy) {
-            panX += dx;
-            panY += dy;
-            updateBookTransform();
-        }
-
-        function resetPan() {
-            panX = 0;
-            panY = 0;
-            updateBookTransform();
-        }
-
-        // --- Drag-to-Pan and Touch/Wheel Listeners ---
-        function initPanZoomListeners() {
-            const viewArea = document.getElementById('desktop-3d-view');
-            if (!viewArea) return;
-
-            let initialPinchDistance = null;
-            let initialZoom = 1.0;
-
-            function getDistance(touches) {
-                const dx = touches[0].clientX - touches[1].clientX;
-                const dy = touches[0].clientY - touches[1].clientY;
-                return Math.sqrt(dx * dx + dy * dy);
-            }
-
-            // Mouse Drag Pan
-            viewArea.addEventListener('mousedown', (e) => {
-                if (e.target.closest('button') || e.target.closest('input')) return;
-                isPanning = true;
-                startX = e.clientX - panX;
-                startY = e.clientY - panY;
-            });
-
-            window.addEventListener('mousemove', (e) => {
-                if (!isPanning) return;
-                panX = e.clientX - startX;
-                panY = e.clientY - startY;
-                updateBookTransform();
-            });
-
-            window.addEventListener('mouseup', () => {
-                isPanning = false;
-            });
-
-            // Touch Drag Pan & Pinch Zoom
-            viewArea.addEventListener('touchstart', (e) => {
-                if (e.target.closest('button') || e.target.closest('input')) return;
-                
-                if (e.touches.length === 1) {
-                    isPanning = true;
-                    startX = e.touches[0].clientX - panX;
-                    startY = e.touches[0].clientY - panY;
-                } else if (e.touches.length === 2) {
-                    isPanning = false; // Stop panning when zooming
-                    initialPinchDistance = getDistance(e.touches);
-                    initialZoom = userZoomLevel;
-                }
-            }, { passive: true });
-
-            window.addEventListener('touchmove', (e) => {
-                if (e.touches.length === 1 && isPanning) {
-                    panX = e.touches[0].clientX - startX;
-                    panY = e.touches[0].clientY - startY;
-                    updateBookTransform();
-                } else if (e.touches.length === 2 && initialPinchDistance) {
-                    const currentDistance = getDistance(e.touches);
-                    const scale = currentDistance / initialPinchDistance;
-                    userZoomLevel = Math.min(3.0, Math.max(0.4, initialZoom * scale));
-                    updateBookTransform();
-                }
-            }, { passive: true });
-
-            window.addEventListener('touchend', (e) => {
-                if (e.touches.length < 2) {
-                    initialPinchDistance = null;
-                }
-                if (e.touches.length === 0) {
-                    isPanning = false;
-                }
-            });
-
-            // Window Resize
-            window.addEventListener('resize', () => {
-                updateBookTransform();
-            });
-        }
-        initPanZoomListeners();
+        });
 
         // Keyboard navigation
         document.addEventListener('keydown', (e) => {
@@ -985,10 +911,117 @@
             } else if (e.key === 'ArrowLeft') {
                 e.preventDefault();
                 prevPage();
-            } else if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
-                // Explicitly prevent Up/Down arrows from scrolling the view natively,
-                // forcing the use of left/right pagination instead as requested.
-                e.preventDefault();
+            } else if (e.key === '+' || e.key === '=') {
+                // Zoom in keyboard
+                currentScale = Math.min(currentScale * 1.1, baseFitScale * 4);
+                applyTransform();
+            } else if (e.key === '-') {
+                // Zoom out keyboard
+                currentScale = Math.max(currentScale * 0.9, baseFitScale * 0.5);
+                applyTransform();
+            }
+        });
+
+        // --- STREAMING_CHUNK:Interactive Drag to Pan and Scroll to Zoom... ---
+        const readerViewContainer = document.getElementById('desktop-3d-view');
+
+        // Mouse Wheel for Zoom
+        readerViewContainer.addEventListener('wheel', (e) => {
+            e.preventDefault(); // Prevent scrolling page
+            const zoomSensitivity = 0.001;
+            const delta = -e.deltaY;
+            
+            let newScale = currentScale * (1 + delta * zoomSensitivity);
+            // Limit zoom range relative to base fit
+            newScale = Math.max(baseFitScale * 0.5, Math.min(newScale, baseFitScale * 5));
+            
+            currentScale = newScale;
+            applyTransform();
+        }, { passive: false });
+
+        // Mouse Drag to Pan
+        readerViewContainer.addEventListener('mousedown', (e) => {
+            // Only left click
+            if (e.button !== 0) return;
+            isDragging = true;
+            readerViewContainer.classList.add('is-dragging');
+            readerViewContainer.style.cursor = 'grabbing';
+            dragStartX = e.clientX;
+            dragStartY = e.clientY;
+            initialPanX = currentPanX;
+            initialPanY = currentPanY;
+        });
+
+        window.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            const dx = e.clientX - dragStartX;
+            const dy = e.clientY - dragStartY;
+            currentPanX = initialPanX + dx;
+            currentPanY = initialPanY + dy;
+            applyTransform();
+        });
+
+        window.addEventListener('mouseup', () => {
+            if (isDragging) {
+                isDragging = false;
+                readerViewContainer.classList.remove('is-dragging');
+                readerViewContainer.style.cursor = 'grab';
+            }
+        });
+
+        // Touch Gestures (Pinch to Zoom, Drag to Pan)
+        readerViewContainer.addEventListener('touchstart', (e) => {
+            if (e.touches.length === 1) {
+                // Single touch: Pan
+                isDragging = true;
+                readerViewContainer.classList.add('is-dragging');
+                dragStartX = e.touches[0].clientX;
+                dragStartY = e.touches[0].clientY;
+                initialPanX = currentPanX;
+                initialPanY = currentPanY;
+            } else if (e.touches.length === 2) {
+                // Double touch: Pinch zoom
+                isDragging = false; // Stop panning
+                const touch1 = e.touches[0];
+                const touch2 = e.touches[1];
+                initialPinchDistance = Math.hypot(touch2.clientX - touch1.clientX, touch2.clientY - touch1.clientY);
+                initialPinchScale = currentScale;
+            }
+        }, { passive: false });
+
+        readerViewContainer.addEventListener('touchmove', (e) => {
+            e.preventDefault(); // Prevent default browser scrolling/zooming
+
+            if (e.touches.length === 1 && isDragging) {
+                // Pan
+                const dx = e.touches[0].clientX - dragStartX;
+                const dy = e.touches[0].clientY - dragStartY;
+                currentPanX = initialPanX + dx;
+                currentPanY = initialPanY + dy;
+                applyTransform();
+            } else if (e.touches.length === 2 && initialPinchDistance !== null) {
+                // Pinch zoom
+                const touch1 = e.touches[0];
+                const touch2 = e.touches[1];
+                const currentDistance = Math.hypot(touch2.clientX - touch1.clientX, touch2.clientY - touch1.clientY);
+                
+                const pinchRatio = currentDistance / initialPinchDistance;
+                let newScale = initialPinchScale * pinchRatio;
+                // Limit zoom
+                newScale = Math.max(baseFitScale * 0.5, Math.min(newScale, baseFitScale * 5));
+                
+                currentScale = newScale;
+                applyTransform();
+            }
+        }, { passive: false });
+
+        readerViewContainer.addEventListener('touchend', (e) => {
+            if (e.touches.length < 2) {
+                initialPinchDistance = null;
+            }
+            if (e.touches.length === 0) {
+                isDragging = false;
+                readerViewContainer.classList.remove('is-dragging');
             }
         });
 
@@ -1034,30 +1067,8 @@
             }
         });
 
-        // --- Mobile View Toggle ---
-        function applyReadingMode() {
-            const desktopView = document.getElementById('desktop-3d-view');
-            const verticalView = document.getElementById('vertical-reader-view');
-            const btn = document.getElementById('mobile-mode-btn');
 
-            if (isMobileReadingMode) {
-                desktopView.classList.add('hidden');
-                verticalView.classList.remove('hidden');
-                btn.classList.add('bg-gold/20', 'text-gold');
-            } else {
-                desktopView.classList.remove('hidden');
-                verticalView.classList.add('hidden');
-                btn.classList.remove('bg-gold/20', 'text-gold');
-                updateBookTransform();
-            }
-            updateReaderUI();
-        }
-
-        function toggleMobileMode() {
-            isMobileReadingMode = !isMobileReadingMode;
-            applyReadingMode();
-        }
-
+        // --- STREAMING_CHUNK:Bookmark and Auth functionalties... ---
         // --- Bookmarks Management ---
         function toggleBookmarkCurrent() {
             if (!currentBook) return;
@@ -1142,11 +1153,52 @@
             });
         }
 
+        // --- Auth & Account Management ---
         var isRegisterMode = false;
+        var currentUser = null;
+
         function toggleAuthMode() {
             isRegisterMode = !isRegisterMode;
             document.getElementById('auth-title').innerText = isRegisterMode ? 'Create Account' : 'Log In to Ink & Light';
             document.getElementById('auth-switch-btn').innerText = isRegisterMode ? 'Already have an account? Log In' : 'Need an account? Register';
+        }
+
+        function forceAuthMode(mode) {
+            isRegisterMode = mode === 'register';
+            document.getElementById('auth-title').innerText = isRegisterMode ? 'Create Account' : 'Log In to Ink & Light';
+            document.getElementById('auth-switch-btn').innerText = isRegisterMode ? 'Already have an account? Log In' : 'Need an account? Register';
+        }
+
+        function updateAuthUI() {
+            const headerAuth = document.getElementById('auth-container');
+            const settingsAuth = document.getElementById('settings-auth-container');
+            
+            if (currentUser) {
+                if(headerAuth) headerAuth.innerHTML = `<span class="text-xs text-gold font-medium px-3 py-1.5"><i class="fa-solid fa-user-check mr-1"></i> ${currentUser}</span>`;
+                if(settingsAuth) {
+                    settingsAuth.innerHTML = `
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm text-white font-medium">Logged in as: <span class="text-gold">${currentUser}</span></p>
+                            </div>
+                            <button onclick="logout()" class="px-4 py-2 rounded-xl bg-white/5 border border-white/10 hover:bg-red-500/20 hover:text-red-400 text-xs text-white transition">Log Out</button>
+                        </div>`;
+                }
+            } else {
+                if(headerAuth) headerAuth.innerHTML = `<button onclick="openAuthModal()" class="px-3 py-1.5 md:px-4 md:py-2 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 transition text-[10px] md:text-xs font-medium text-white">Log In</button>`;
+                if(settingsAuth) {
+                    settingsAuth.innerHTML = `
+                        <div class="flex items-center space-x-3">
+                            <button onclick="openAuthModal(); forceAuthMode('login');" class="px-4 py-2 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-xs text-white transition">Log In</button>
+                            <button onclick="openAuthModal(); forceAuthMode('register');" class="px-4 py-2 rounded-xl bg-gold text-black hover:bg-darkgold text-xs font-semibold transition">Sign Up</button>
+                        </div>`;
+                }
+            }
+        }
+
+        function logout() {
+            currentUser = null;
+            updateAuthUI();
         }
 
         async function handleAuthSubmit() {
@@ -1173,20 +1225,50 @@
                 const result = await res.json();
 
                 if (result.success) {
-                    document.getElementById('auth-container').innerHTML = `<span class="text-xs text-gold font-medium"><i class="fa-solid fa-user-check mr-1"></i>${email}</span>`;
+                    currentUser = email;
+                    updateAuthUI();
                     closeAuthModal();
                 } else {
                     alert('Auth Error: ' + (result.error || 'Authentication failed.'));
                 }
             } catch (err) {
                 // Client-side fallback if server CORS blocks POST
-                document.getElementById('auth-container').innerHTML = `<span class="text-xs text-gold font-medium">${email}</span>`;
+                currentUser = email;
+                updateAuthUI();
                 closeAuthModal();
             }
         }
 
+        // Initialize UI State
+        updateAuthUI();
+
+        // --- Theme Management ---
+        function setTheme(mode) {
+            const btnDark = document.getElementById('theme-btn-dark');
+            const btnLight = document.getElementById('theme-btn-light');
+            
+            if (mode === 'light') {
+                document.body.classList.add('light-theme');
+                btnLight.classList.add('bg-white/10', 'text-white');
+                btnLight.classList.remove('text-gray-400');
+                btnDark.classList.remove('bg-white/10', 'text-white');
+                btnDark.classList.add('text-gray-400');
+            } else {
+                document.body.classList.remove('light-theme');
+                btnDark.classList.add('bg-white/10', 'text-white');
+                btnDark.classList.remove('text-gray-400');
+                btnLight.classList.remove('bg-white/10', 'text-white');
+                btnLight.classList.add('text-gray-400');
+            }
+        }
+
         async function submitBook() {
-            const title = document.getElementById('pub-title').value;
+            const title = document.getElementById('pub-title').value.trim();
+            const subtitle = document.getElementById('pub-subtitle').value.trim();
+            const author = document.getElementById('pub-author').value.trim() || 'Anonymous';
+            const keywords = document.getElementById('pub-keywords').value.trim();
+            const desc = document.getElementById('pub-desc').value.trim();
+            const includeCopyright = document.getElementById('pub-copyright').checked;
             
             const selectedPills = document.querySelectorAll('.selected-genre');
             const genresList = Array.from(selectedPills).map(pill => pill.innerText).join(', ');
@@ -1194,22 +1276,67 @@
 
             const coverUrl = document.getElementById('pub-cover').value || 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=600&q=80';
             
-            // Gather all page inputs dynamically
+            // Gather all user-uploaded page inputs dynamically
             const pageInputs = Array.from(document.querySelectorAll('.pub-page-input'));
-            const pages = pageInputs.map(input => input.value.trim()).filter(val => val !== '');
-            const rawContent = pages.join(' ||PAGE|| ');
+            const userPages = pageInputs.map(input => input.value.trim()).filter(val => val !== '');
 
-            if (!title || pages.length === 0) {
+            if (!title || userPages.length === 0) {
                 alert('Please fill out the title and add at least one page.');
                 return;
             }
+
+            // Generate Title Page HTML
+            const titlePageHTML = `
+                <div class="flex flex-col items-center justify-center h-full text-center py-16 px-8 relative">
+                    <div class="absolute top-12 w-16 h-px bg-gold/50"></div>
+                    <div class="flex-1 flex flex-col justify-center w-full">
+                        <h1 class="text-3xl md:text-5xl font-bold mb-4 font-serif text-white tracking-wide">${title}</h1>
+                        ${subtitle ? `<h2 class="text-lg md:text-xl italic text-gray-400 mb-8 font-serif">${subtitle}</h2>` : ''}
+                    </div>
+                    <div class="mt-auto pt-12 border-t border-white/10 w-2/3 mx-auto flex flex-col items-center">
+                        <span class="text-[10px] text-gray-500 uppercase tracking-widest mb-2">Written By</span>
+                        <span class="text-lg font-serif text-gold">${author}</span>
+                    </div>
+                </div>
+            `;
+
+            // Generate Copyright Page HTML
+            const copyrightPageHTML = `
+                <div class="flex flex-col justify-end h-full text-left py-12 px-8 text-[11px] leading-relaxed text-gray-500 space-y-4 font-sans">
+                    <div>
+                        <p class="font-bold text-gray-300 text-sm mb-1 font-serif">${title}</p>
+                        ${subtitle ? `<p class="italic mb-2">${subtitle}</p>` : ''}
+                    </div>
+                    <p>Copyright © ${new Date().getFullYear()} by ${author}</p>
+                    <p>All rights reserved. No part of this publication may be reproduced, distributed, or transmitted in any form or by any means, including photocopying, recording, or other electronic or mechanical methods, without the prior written permission of the publisher, except in the case of brief quotations embodied in critical reviews and certain other noncommercial uses permitted by copyright law.</p>
+                    ${desc ? `<div><p class="font-semibold text-gray-400 mb-1">Description:</p><p>${desc}</p></div>` : ''}
+                    ${keywords ? `<p><span class="font-semibold text-gray-400">Keywords:</span> ${keywords}</p>` : ''}
+                    <div class="pt-4 mt-4 border-t border-white/10">
+                        <p>Published via Ink & Light 3D Reader.</p>
+                    </div>
+                </div>
+            `;
+
+            // Blank Inside Cover page to maintain proper Spread Pacing (Right Cover -> Left Inside Cover -> Right Title Page)
+            const blankPage = "<div class='flex items-center justify-center h-full w-full text-gray-600/30 italic font-serif text-sm'>[Inside Cover]</div>";
+            const blankRightPage = "<div class='flex items-center justify-center h-full w-full text-gray-600/30 italic font-serif text-sm'>[Blank]</div>";
+
+            // Construct Final Pages Array for the Reader
+            const bookPages = [
+                blankPage, 
+                titlePageHTML, 
+                includeCopyright ? copyrightPageHTML : blankRightPage,
+                ...userPages
+            ];
+
+            const rawContent = bookPages.join(' ||PAGE|| ');
 
             const newBook = {
                 id: 'bk_' + Date.now(),
                 title,
                 genre,
                 coverUrl,
-                pages: [coverUrl, ...pages]
+                pages: [coverUrl, ...bookPages]
             };
 
             // Post to live backend endpoint
@@ -1236,7 +1363,12 @@
             
             // Reset modal inputs for next use
             document.getElementById('pub-title').value = '';
+            document.getElementById('pub-subtitle').value = '';
+            document.getElementById('pub-author').value = '';
+            document.getElementById('pub-keywords').value = '';
+            document.getElementById('pub-desc').value = '';
             document.getElementById('pub-cover').value = '';
+            document.getElementById('pub-copyright').checked = true;
             document.querySelectorAll('.selected-genre').forEach(pill => toggleGenre(pill));
             document.getElementById('pub-pages-container').innerHTML = `
                 <div class="flex items-start space-x-2 page-input-row">
