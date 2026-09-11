@@ -62,9 +62,6 @@
         /* 3D BOOK ENGINE STYLES */
         .book-section { 
             perspective: 2500px; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
             width: 100%; 
             height: 100%; 
             z-index: 10; 
@@ -72,12 +69,15 @@
             user-select: none;
         }
         
-        /* Base Open Spread Dimensions: 1131px wide x 800px high (Each page is 565.5px x 800px -> exact A4 ratio 1:1.414) */
+        /* Base Open Spread Dimensions: 1131px wide x 800px high */
         .book { 
-            position: relative; 
+            position: absolute; 
             width: 1131px; 
             height: 800px; 
-            flex-shrink: 0; 
+            left: 50%;
+            top: 50%;
+            margin-left: -565.5px;
+            margin-top: -400px;
             transform-style: preserve-3d; 
             transition: transform 0.15s ease-out;
             transform-origin: center center;
@@ -121,7 +121,6 @@
             transform: translateY(-50%);
             width: 50px;
             height: 100%;
-            display: flex;
             align-items: center;
             justify-content: center;
             background: transparent;
@@ -147,9 +146,7 @@
         #book-transform-wrap {
             transition: transform 0.1s ease-out; /* Smooth transitions for mouse wheel */
             will-change: transform;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            position: relative;
             width: 100%;
             height: 100%;
         }
@@ -171,6 +168,77 @@
         body.light-theme .bg-white\/5 { background-color: rgba(0, 0, 0, 0.05) !important; }
         body.light-theme .hover\:bg-white\/10:hover { background-color: rgba(0, 0, 0, 0.1) !important; }
 
+        /* 3D CUBE LOGO */
+        .logo-cube-container { 
+            perspective: 400px; 
+            width: 100%; 
+            height: 100%; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            overflow: visible; 
+        }
+        .logo-cube { 
+            width: 16px; 
+            height: 16px; 
+            position: relative; 
+            transform-style: preserve-3d; 
+            animation: spinCube 12s infinite linear; 
+        }
+        @media (min-width: 768px) {
+            .logo-cube { width: 20px; height: 20px; }
+            .logo-cube-face { width: 20px !important; height: 20px !important; font-size: 10px !important; }
+            .logo-cube-face.front  { transform: translateZ(10px) !important; }
+            .logo-cube-face.back   { transform: rotateY(180deg) translateZ(10px) !important; }
+            .logo-cube-face.right  { transform: rotateY(90deg) translateZ(10px) !important; }
+            .logo-cube-face.left   { transform: rotateY(-90deg) translateZ(10px) !important; }
+            .logo-cube-face.top    { transform: rotateX(90deg) translateZ(10px) !important; }
+            .logo-cube-face.bottom { transform: rotateX(-90deg) translateZ(10px) !important; }
+        }
+        .logo-cube-face { 
+            position: absolute; 
+            width: 16px; 
+            height: 16px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-size: 8px; 
+            background: rgba(18, 21, 28, 0.95); 
+            border: 1px solid rgba(210, 168, 94, 0.5); 
+            box-shadow: inset 0 0 6px rgba(210, 168, 94, 0.2); 
+            backface-visibility: visible; 
+            color: #d2a85e;
+        }
+        .logo-cube-face.front  { transform: translateZ(8px); }
+        .logo-cube-face.back   { transform: rotateY(180deg) translateZ(8px); }
+        .logo-cube-face.right  { transform: rotateY(90deg) translateZ(8px); }
+        .logo-cube-face.left   { transform: rotateY(-90deg) translateZ(8px); }
+        .logo-cube-face.top    { transform: rotateX(90deg) translateZ(8px); }
+        .logo-cube-face.bottom { transform: rotateX(-90deg) translateZ(8px); }
+        
+        @keyframes spinCube { 
+            0%, 15%, 100% { transform: rotateX(-15deg) rotateY(0deg); }
+            20%, 35% { transform: rotateX(-15deg) rotateY(-90deg); }
+            40%, 55% { transform: rotateX(-15deg) rotateY(90deg); }
+            60%, 75% { transform: rotateX(-90deg) rotateY(0deg); }
+            80%, 95% { transform: rotateX(90deg) rotateY(0deg); }
+        }
+
+        /* GOLDEN GLITTER CURSOR */
+        .glitter-particle {
+            position: fixed;
+            pointer-events: none;
+            background-color: #d2a85e;
+            border-radius: 50%;
+            box-shadow: 0 0 8px 2px rgba(210, 168, 94, 0.8);
+            z-index: 99999;
+            animation: glitterAnim 0.8s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+        }
+        @keyframes glitterAnim {
+            0% { opacity: 1; transform: scale(1) translate(0, 0); }
+            100% { opacity: 0; transform: scale(0.1) translate(calc(-20px + 40px * var(--rndX)), calc(20px + 20px * var(--rndY))); }
+        }
+
     </style>
 </head>
 <body class="h-screen w-screen overflow-hidden relative">
@@ -184,8 +252,17 @@
                     <i class="fa-solid fa-bars text-xl"></i>
                 </button>
                 <div class="flex items-center space-x-2 md:space-x-3 cursor-pointer" onclick="switchView('view-home')">
-                    <div class="w-8 h-8 md:w-10 md:h-10 rounded-xl bg-gold/10 border border-gold/30 flex items-center justify-center text-gold">
-                        <i class="fa-solid fa-feather-pointed text-base md:text-lg"></i>
+                    <div class="w-8 h-8 md:w-10 md:h-10 rounded-xl bg-gold/5 border border-gold/30 flex items-center justify-center overflow-hidden">
+                        <div class="logo-cube-container">
+                            <div class="logo-cube">
+                                <div class="logo-cube-face front" title="Feather"><i class="fa-solid fa-feather"></i></div>
+                                <div class="logo-cube-face right" title="Ink Bottle"><i class="fa-solid fa-bottle-droplet"></i></div>
+                                <div class="logo-cube-face left" title="Pen"><i class="fa-solid fa-pen-nib"></i></div>
+                                <div class="logo-cube-face top" title="Hand Writing"><i class="fa-solid fa-hand-holding-pen"></i></div>
+                                <div class="logo-cube-face bottom" title="Book"><i class="fa-solid fa-book"></i></div>
+                                <div class="logo-cube-face back" title="Scroll"><i class="fa-solid fa-scroll"></i></div>
+                            </div>
+                        </div>
                     </div>
                     <div>
                         <h1 class="font-serif font-bold text-base md:text-lg tracking-wide text-white leading-tight">Ink & Light</h1>
@@ -266,8 +343,8 @@
                         <div class="absolute right-0 top-0 w-1/3 h-full opacity-10 bg-[radial-gradient(#d2a85e_1px,transparent_1px)] [background-size:16px_16px]"></div>
                         <div class="relative z-10 max-w-2xl space-y-4 md:space-y-5">
                             <div><span class="px-3 py-1 rounded-full bg-gold/10 border border-gold/30 text-gold text-[10px] md:text-xs font-semibold uppercase tracking-wider">Immersive Reading</span></div>
-                            <h2 class="font-serif text-2xl md:text-5xl font-bold tracking-tight text-white leading-tight">Experience Stories in True 3D A4 Elegance</h2>
-                            <p class="text-gray-400 text-xs md:text-base leading-relaxed">Upload your manga, novels, or notes, and read them with realistic page turns, full-bleed clarity, smooth zooming, and drag-to-scroll controls.</p>
+                            <h2 class="font-serif text-2xl md:text-5xl font-bold tracking-tight text-white leading-tight">Experience Stories in True Elegance</h2>
+                            <p class="text-gray-400 text-xs md:text-base leading-relaxed">Enjoy immersive 3D page-turns on desktop and seamless vertical scrolling on mobile. Dive into your favorite manga and novels effortlessly.</p>
                             <div class="pt-3 flex flex-col sm:flex-row sm:items-center space-y-3 sm:space-y-0 sm:space-x-4">
                                 <button onclick="switchView('view-library')" class="w-full sm:w-auto px-6 py-3 rounded-xl bg-gold text-black font-semibold hover:bg-darkgold transition shadow-lg shadow-gold/20 flex items-center justify-center space-x-2">
                                     <i class="fa-solid fa-book-open"></i>
@@ -284,7 +361,7 @@
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         <div>
                             <h3 class="font-serif text-xl md:text-2xl font-bold text-white">Featured Books & Manga</h3>
-                            <p class="text-xs text-gray-400">Select any volume to launch the interactive 3D reader.</p>
+                            <p class="text-xs text-gray-400">Select any volume to launch the interactive reader.</p>
                         </div>
                         <div class="flex items-center w-full sm:w-auto">
                             <input type="text" id="search-input" oninput="filterBooks()" placeholder="Search books..." class="bg-black/40 border border-white/10 rounded-xl px-4 py-2 text-xs focus:outline-none focus:border-gold/50 text-white w-full sm:w-48 md:w-64">
@@ -352,23 +429,35 @@
                             </div>
                             <input type="checkbox" id="setting-fireflies" checked onchange="toggleFireflies(this)" class="w-4 h-4 accent-gold cursor-pointer">
                         </div>
+
+                        <div class="flex items-center justify-between mt-4">
+                            <div>
+                                <h4 class="font-medium text-sm text-white">Golden Cursor Glitter</h4>
+                                <p class="text-xs text-gray-400">Customize the magical golden trail following your cursor.</p>
+                            </div>
+                            <select id="setting-glitter" onchange="updateGlitter(this.value)" class="bg-black/50 border border-white/10 rounded-lg px-2 py-1.5 text-xs text-white focus:outline-none focus:border-gold cursor-pointer">
+                                <option value="none">Off</option>
+                                <option value="light" selected>Light</option>
+                                <option value="heavy">Heavy</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
 
-                <!-- 5. 3D A4 READER VIEW WITH ZOOM & PAN CONTROLS -->
-                <div id="view-reader" class="view-panel absolute inset-0 hidden flex-col bg-black/95 z-30">
+                <!-- 5. READER VIEW (Responsive: 3D on Desktop, Scroll on Mobile) -->
+                <div id="view-reader" class="view-panel absolute inset-0 hidden flex flex-col bg-black/95 z-30">
                     <!-- Reader Top Navigation Bar -->
                     <div class="h-14 border-b border-white/10 bg-black/80 backdrop-blur-md flex items-center justify-between px-6 z-20">
                         <button onclick="closeReader()" class="flex items-center space-x-2 text-gray-400 hover:text-white transition text-xs font-medium">
                             <i class="fa-solid fa-arrow-left"></i>
-                            <span>Back to Library</span>
+                            <span class="hidden md:inline">Back to Library</span>
                         </button>
-                        <div class="text-center">
-                            <h3 id="reader-book-title" class="font-serif font-bold text-sm text-white">Book Title</h3>
+                        <div class="text-center truncate px-2">
+                            <h3 id="reader-book-title" class="font-serif font-bold text-sm text-white truncate max-w-[150px] md:max-w-md">Book Title</h3>
                             <span id="reader-page-indicator" class="text-[10px] text-gold tracking-widest uppercase">Spread 1 of 1</span>
                         </div>
                         <div class="flex items-center space-x-3">
-                            <button onclick="resetZoomPan()" class="w-8 h-8 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 text-xs text-gray-300 transition flex items-center justify-center" title="Reset View">
+                            <button onclick="resetZoomPan()" class="hidden md:flex w-8 h-8 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 text-xs text-gray-300 transition items-center justify-center" title="Reset View">
                                 <i class="fa-solid fa-compress"></i>
                             </button>
                             <button onclick="toggleFullscreen()" id="fullscreen-btn" class="px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 text-xs text-gray-300 transition flex items-center space-x-1.5">
@@ -381,14 +470,15 @@
                     </div>
 
                     <!-- Reader Interactive Canvas / Container -->
-                    <div class="flex-1 relative overflow-hidden flex items-center justify-center" id="reader-container-wrap">
+                    <div class="flex-1 relative overflow-hidden flex w-full h-full" id="reader-container-wrap">
                         
-                        <!-- Left Navigation Button -->
-                        <button onclick="prevPage()" class="nav-btn left-0" title="Previous Page">
+                        <!-- Left Navigation Button (Desktop Only) -->
+                        <button onclick="prevPage()" class="nav-btn left-0 hidden md:flex" title="Previous Page">
                             <i class="fa-solid fa-chevron-left"></i>
                         </button>
 
-                        <div id="desktop-3d-view" class="book-section flex-1 relative overflow-hidden" style="touch-action: none; cursor: grab;">
+                        <!-- DESKTOP: 3D Book View -->
+                        <div id="desktop-3d-view" class="book-section hidden md:flex flex-1 relative overflow-hidden" style="touch-action: none; cursor: grab;">
                             <div id="book-transform-wrap">
                                 <!-- 3D Book Container -->
                                 <div id="book" class="book">
@@ -397,8 +487,13 @@
                             </div>
                         </div>
 
-                        <!-- Right Navigation Button -->
-                        <button onclick="nextPage()" class="nav-btn right-0 next" title="Next Page">
+                        <!-- MOBILE: Vertical Scroll View -->
+                        <div id="mobile-scroll-view" class="flex-1 w-full h-full overflow-y-auto flex flex-col md:hidden p-4 space-y-6 pb-24 items-center scroll-smooth">
+                            <!-- Pages will be dynamically populated here -->
+                        </div>
+
+                        <!-- Right Navigation Button (Desktop Only) -->
+                        <button onclick="nextPage()" class="nav-btn right-0 next hidden md:flex" title="Next Page">
                             <i class="fa-solid fa-chevron-right"></i>
                         </button>
                     </div>
@@ -544,7 +639,6 @@
     </div>
 
     <script>
-        // --- STREAMING_CHUNK:Initializing JavaScript Application State... ---
         // Live Google Apps Script API Endpoint
         var API_URL = 'https://script.google.com/macros/s/AKfycbzhRZm0qBCQv7wjvbeuCZBY4sNY_wNFXz0HeLcZLmh9tP0ZJZDxpzdMoYa8l36Yg0j-6A/exec';
 
@@ -571,7 +665,15 @@
         async function fetchLiveBooks() {
             try {
                 const response = await fetch(API_URL);
-                const result = await response.json();
+                const text = await response.text();
+                
+                let result;
+                try {
+                    result = JSON.parse(text);
+                } catch(e) {
+                    console.warn('Backend returned non-JSON. Running in offline mode.');
+                    return;
+                }
 
                 if (result.success && Array.isArray(result.data) && result.data.length > 0) {
                     const loadedBooks = result.data.map(item => {
@@ -601,12 +703,12 @@
 
         var bookmarks = [];
         var currentBook = null;
-        var currentPageIndex = 0; // Spread index
+        var currentPageIndex = 0; // Spread index on desktop
         var isPseudoFullscreen = false;
 
-        // Zoom and Pan State
+        // Zoom and Pan State (Desktop 3D)
         let currentScale = 1;
-        let baseFitScale = 1; // The calculated fit scale to return to
+        let baseFitScale = 1;
         let currentPanX = 0;
         let currentPanY = 0;
         let isDragging = false;
@@ -614,9 +716,11 @@
         let dragStartY = 0;
         let initialPanX = 0;
         let initialPanY = 0;
-        // Touch state
         let initialPinchDistance = null;
         let initialPinchScale = 1;
+
+        // Mobile Intersection Observer state
+        let mobileObserver = null;
 
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
@@ -654,7 +758,6 @@
             closeSidebarOnMobile();
         }
 
-        // --- STREAMING_CHUNK:Rendering library catalog... ---
         function renderHomeCatalog() {
             const grid = document.getElementById('books-grid');
             const fullGrid = document.getElementById('full-books-grid');
@@ -685,7 +788,7 @@
         }
         renderHomeCatalog();
 
-        // --- 3D A4 Reader Engine ---
+        // --- Reader Engine (Hybrid 3D / Mobile Scroll) ---
         function openReader(bookId) {
             currentBook = books.find(b => b.id === bookId);
             if (!currentBook) return;
@@ -693,8 +796,8 @@
             currentPageIndex = 0;
             document.getElementById('reader-book-title').innerText = currentBook.title;
             switchView('view-reader');
-            buildBookDOM();
             
+            buildBookDOM();
             updateReaderUI();
             
             // Allow container layout before sizing transform
@@ -724,18 +827,17 @@
             }
         }
 
-        // --- STREAMING_CHUNK:Building book leaves and scaling logic... ---
         function buildBookDOM() {
             const bookEl = document.getElementById('book');
+            const mobileViewEl = document.getElementById('mobile-scroll-view');
             
             let totalPages = [...currentBook.pages];
-            // Ensure even count for spread layout
+            // Ensure even count for spread layout on desktop
             if (totalPages.length % 2 !== 0) {
                 totalPages.push("");
             }
 
-            // Build 3D Spread Leaves
-            // Leaf i handles Page 2i (front, unflipped right side) and Page 2i+1 (back, flipped left side)
+            // 1. Build Desktop 3D Spread Leaves
             let leavesHTML = '';
             const totalLeaves = Math.ceil(totalPages.length / 2);
 
@@ -744,8 +846,35 @@
                 let leftContent = totalPages[(2 * i) + 1] || "";
                 leavesHTML += createLeafHTML(i, totalLeaves, rightContent, leftContent);
             }
-
             bookEl.innerHTML = leavesHTML;
+
+            // 2. Build Mobile Vertical Scroll View
+            let mobileHTML = '';
+            let validMobilePageIndex = 0;
+            
+            currentBook.pages.forEach((pageContent) => {
+                // Filter out empty spaces and explicitly added layout placeholders that disrupt a single scroll view
+                if (!pageContent || pageContent.trim() === '') return;
+                if (pageContent.includes('>[Inside Cover]<') || pageContent.includes('>[Blank]<')) return;
+
+                // For purely text pages allow adaptive height, for images enforce A4 portrait aspect ratio
+                const isImage = pageContent.includes('<img') || /^(https?:\/\/|data:image\/).+/i.test(pageContent.trim());
+                const sizeClass = isImage ? 'aspect-[1/1.414]' : 'min-h-[70vh] md:aspect-[1/1.414]';
+
+                mobileHTML += `
+                    <div class="w-full max-w-2xl mx-auto bg-[#12151c] border border-white/5 shadow-2xl relative flex flex-col shrink-0 page-mobile-container rounded-lg overflow-hidden ${sizeClass}" data-mobile-page="${validMobilePageIndex}">
+                        ${renderPageContent(pageContent)}
+                        <div class="absolute bottom-2 right-3 text-[10px] text-gray-400 font-mono z-10 bg-black/60 px-2 py-0.5 rounded-full shadow-md">${validMobilePageIndex + 1}</div>
+                    </div>
+                `;
+                validMobilePageIndex++;
+            });
+            
+            mobileViewEl.innerHTML = mobileHTML;
+            mobileViewEl.scrollTop = 0;
+            
+            // Setup intersection observer to track which page is active on mobile
+            setTimeout(setupMobileScrollObserver, 100);
         }
 
         function createLeafHTML(index, totalLeaves, rightText, leftText) {
@@ -753,13 +882,13 @@
                 <div class="paper" data-leaf="${index}" style="z-index: ${totalLeaves - index};">
                     <div class="front">
                         <div class="h-full w-full relative flex flex-col justify-between bg-[#12151c] border-l border-white/5 select-none overflow-hidden">
-                            ${renderPageContent(rightText, false)}
+                            ${renderPageContent(rightText)}
                             ${rightText ? `<span class="absolute bottom-3 right-4 text-[10px] text-gray-500 font-mono z-10">${(index * 2) + 1}</span>` : ''}
                         </div>
                     </div>
                     <div class="back">
                         <div class="h-full w-full relative flex flex-col justify-between bg-[#151921] border-r border-white/5 select-none overflow-hidden">
-                            ${renderPageContent(leftText, false)}
+                            ${renderPageContent(leftText)}
                             ${leftText ? `<span class="absolute bottom-3 left-4 text-[10px] text-gray-500 font-mono z-10">${(index * 2) + 2}</span>` : ''}
                         </div>
                     </div>
@@ -822,7 +951,31 @@
             }[tag] || tag));
         }
 
+        function setupMobileScrollObserver() {
+            if (mobileObserver) mobileObserver.disconnect();
+            
+            const pages = document.querySelectorAll('.page-mobile-container');
+            if (!pages.length) return;
+
+            mobileObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting && window.innerWidth < 768) {
+                        const pageIndex = parseInt(entry.target.getAttribute('data-mobile-page'));
+                        const totalMobilePages = document.querySelectorAll('.page-mobile-container').length;
+                        document.getElementById('reader-page-indicator').innerText = `Page ${pageIndex + 1} of ${totalMobilePages}`;
+                        
+                        // Sync spread index roughly for bookmarking logic
+                        currentPageIndex = Math.floor(pageIndex / 2);
+                        updateBookmarkButtonState();
+                    }
+                });
+            }, { threshold: 0.5 }); // Detects when at least 50% of the page is in view
+
+            pages.forEach(p => mobileObserver.observe(p));
+        }
+
         function updateReaderUI() {
+            // Update 3D Book State
             const papers = document.querySelectorAll('.paper');
             const totalLeaves = papers.length;
 
@@ -836,11 +989,16 @@
                 }
             });
 
-            document.getElementById('reader-page-indicator').innerText = `Spread ${currentPageIndex + 1} of ${totalLeaves}`;
+            // Update Label based on Desktop/Mobile Viewports
+            if (window.innerWidth >= 768) {
+                document.getElementById('reader-page-indicator').innerText = `Spread ${currentPageIndex + 1} of ${totalLeaves}`;
+            }
+            
             updateBookmarkButtonState();
         }
 
         function nextPage() {
+            if (window.innerWidth < 768) return; // Managed by scroll natively on mobile
             const papers = document.querySelectorAll('.paper');
             if (currentPageIndex < papers.length) {
                 currentPageIndex++;
@@ -849,22 +1007,29 @@
         }
 
         function prevPage() {
+            if (window.innerWidth < 768) return;
             if (currentPageIndex > 0) {
                 currentPageIndex--;
                 updateReaderUI();
             }
         }
 
-        // --- STREAMING_CHUNK:Scale fitting to viewport... ---
         function calculateBaseFit() {
             const container = document.getElementById('desktop-3d-view');
             if (!container) return;
             
-            const containerWidth = container.clientWidth || window.innerWidth;
-            const containerHeight = container.clientHeight || window.innerHeight;
+            let containerWidth = container.clientWidth || window.innerWidth;
+            let containerHeight = container.clientHeight || window.innerHeight;
+            
+            // Failsafe if flex height collapses during transition
+            if (containerWidth === 0 || containerHeight === 0) {
+                containerWidth = window.innerWidth;
+                containerHeight = window.innerHeight;
+            }
             
             // Base A4 spread proportions fit
-            baseFitScale = Math.min((containerWidth * 0.92) / 1131, (containerHeight * 0.86) / 800);
+            baseFitScale = Math.min((containerWidth * 0.92) / 1131, (containerHeight * 0.86) / 800) || 0.5;
+            if (baseFitScale < 0.1) baseFitScale = 0.5; // Prevent invisible scaling
             currentScale = baseFitScale;
         }
 
@@ -872,9 +1037,7 @@
             const transformWrap = document.getElementById('book-transform-wrap');
             const bookEl = document.getElementById('book');
             if (transformWrap && bookEl) {
-                // Apply pan to the wrapper
                 transformWrap.style.transform = `translate(${currentPanX}px, ${currentPanY}px)`;
-                // Apply scale directly to the book to maintain 3D perspective context
                 bookEl.style.transform = `scale(${currentScale})`;
             }
         }
@@ -887,22 +1050,20 @@
         }
 
         function updateBookTransform() {
-            // Re-calculate base fit on resize, but don't reset user's custom zoom/pan if they are active
-            // For now, simple resize resets view to ensure it stays in bounds nicely
             calculateBaseFit();
             resetZoomPan();
+            updateReaderUI(); // Re-trigger UI update for mobile/desktop toggle check
         }
 
-        // Window Resize
         window.addEventListener('resize', () => {
             updateBookTransform();
         });
 
-        // Keyboard navigation
+        // Keyboard navigation (Desktop Only)
         document.addEventListener('keydown', (e) => {
             if (document.getElementById('view-reader').classList.contains('hidden')) return;
+            if (window.innerWidth < 768) return; // Disable keyboard spread-flipping on mobile scroll view
             
-            // Allow input typing (e.g. search box or publish modal)
             if (e.target.tagName.toLowerCase() === 'input' || e.target.tagName.toLowerCase() === 'textarea') return;
 
             if (e.key === 'ArrowRight') {
@@ -912,36 +1073,28 @@
                 e.preventDefault();
                 prevPage();
             } else if (e.key === '+' || e.key === '=') {
-                // Zoom in keyboard
                 currentScale = Math.min(currentScale * 1.1, baseFitScale * 4);
                 applyTransform();
             } else if (e.key === '-') {
-                // Zoom out keyboard
                 currentScale = Math.max(currentScale * 0.9, baseFitScale * 0.5);
                 applyTransform();
             }
         });
 
-        // --- STREAMING_CHUNK:Interactive Drag to Pan and Scroll to Zoom... ---
         const readerViewContainer = document.getElementById('desktop-3d-view');
 
-        // Mouse Wheel for Zoom
         readerViewContainer.addEventListener('wheel', (e) => {
-            e.preventDefault(); // Prevent scrolling page
+            e.preventDefault();
             const zoomSensitivity = 0.001;
             const delta = -e.deltaY;
             
             let newScale = currentScale * (1 + delta * zoomSensitivity);
-            // Limit zoom range relative to base fit
             newScale = Math.max(baseFitScale * 0.5, Math.min(newScale, baseFitScale * 5));
-            
             currentScale = newScale;
             applyTransform();
         }, { passive: false });
 
-        // Mouse Drag to Pan
         readerViewContainer.addEventListener('mousedown', (e) => {
-            // Only left click
             if (e.button !== 0) return;
             isDragging = true;
             readerViewContainer.classList.add('is-dragging');
@@ -969,63 +1122,6 @@
             }
         });
 
-        // Touch Gestures (Pinch to Zoom, Drag to Pan)
-        readerViewContainer.addEventListener('touchstart', (e) => {
-            if (e.touches.length === 1) {
-                // Single touch: Pan
-                isDragging = true;
-                readerViewContainer.classList.add('is-dragging');
-                dragStartX = e.touches[0].clientX;
-                dragStartY = e.touches[0].clientY;
-                initialPanX = currentPanX;
-                initialPanY = currentPanY;
-            } else if (e.touches.length === 2) {
-                // Double touch: Pinch zoom
-                isDragging = false; // Stop panning
-                const touch1 = e.touches[0];
-                const touch2 = e.touches[1];
-                initialPinchDistance = Math.hypot(touch2.clientX - touch1.clientX, touch2.clientY - touch1.clientY);
-                initialPinchScale = currentScale;
-            }
-        }, { passive: false });
-
-        readerViewContainer.addEventListener('touchmove', (e) => {
-            e.preventDefault(); // Prevent default browser scrolling/zooming
-
-            if (e.touches.length === 1 && isDragging) {
-                // Pan
-                const dx = e.touches[0].clientX - dragStartX;
-                const dy = e.touches[0].clientY - dragStartY;
-                currentPanX = initialPanX + dx;
-                currentPanY = initialPanY + dy;
-                applyTransform();
-            } else if (e.touches.length === 2 && initialPinchDistance !== null) {
-                // Pinch zoom
-                const touch1 = e.touches[0];
-                const touch2 = e.touches[1];
-                const currentDistance = Math.hypot(touch2.clientX - touch1.clientX, touch2.clientY - touch1.clientY);
-                
-                const pinchRatio = currentDistance / initialPinchDistance;
-                let newScale = initialPinchScale * pinchRatio;
-                // Limit zoom
-                newScale = Math.max(baseFitScale * 0.5, Math.min(newScale, baseFitScale * 5));
-                
-                currentScale = newScale;
-                applyTransform();
-            }
-        }, { passive: false });
-
-        readerViewContainer.addEventListener('touchend', (e) => {
-            if (e.touches.length < 2) {
-                initialPinchDistance = null;
-            }
-            if (e.touches.length === 0) {
-                isDragging = false;
-                readerViewContainer.classList.remove('is-dragging');
-            }
-        });
-
-        // --- Fullscreen Toggle with Fallback ---
         function toggleFullscreen() {
             const readerView = document.getElementById('view-reader');
             const fullscreenBtn = document.getElementById('fullscreen-btn');
@@ -1067,9 +1163,6 @@
             }
         });
 
-
-        // --- STREAMING_CHUNK:Bookmark and Auth functionalties... ---
-        // --- Bookmarks Management ---
         function toggleBookmarkCurrent() {
             if (!currentBook) return;
             const existingIdx = bookmarks.findIndex(b => b.bookId === currentBook.id && b.spread === currentPageIndex);
@@ -1106,13 +1199,12 @@
                     <img src="${b.coverUrl}" class="w-full rounded-xl shadow-md">
                     <div>
                         <h4 class="font-serif font-bold text-sm text-white truncate">${b.title}</h4>
-                        <span class="text-[10px] text-gold">Spread #${b.spread + 1}</span>
+                        <span class="text-[10px] text-gold">Location #${b.spread + 1}</span>
                     </div>
                 </div>
             `).join('');
         }
 
-        // --- Modals & Actions ---
         function openPublishModal() { document.getElementById('publish-modal').classList.remove('hidden'); }
         function closePublishModal() { document.getElementById('publish-modal').classList.add('hidden'); }
         function openSyncModal() { document.getElementById('sync-modal').classList.remove('hidden'); }
@@ -1120,7 +1212,6 @@
         function openAuthModal() { document.getElementById('auth-modal').classList.remove('hidden'); }
         function closeAuthModal() { document.getElementById('auth-modal').classList.add('hidden'); }
 
-        // --- STREAMING_CHUNK:Adding dynamic multiple page upload logic... ---
         function addPageInput() {
             const container = document.getElementById('pub-pages-container');
             const rowCount = container.querySelectorAll('.page-input-row').length + 1;
@@ -1133,8 +1224,6 @@
                 <button onclick="removePageInput(this)" class="mt-2 text-gray-500 hover:text-red-400 transition" title="Remove Page"><i class="fa-solid fa-trash"></i></button>
             `;
             container.appendChild(row);
-            
-            // Auto-scroll to bottom
             container.scrollTop = container.scrollHeight;
         }
 
@@ -1146,14 +1235,12 @@
             }
             btn.closest('.page-input-row').remove();
             
-            // Re-number
             const rows = container.querySelectorAll('.page-input-row');
             rows.forEach((row, index) => {
                 row.querySelector('.page-number').innerText = (index + 1) + '.';
             });
         }
 
-        // --- Auth & Account Management ---
         var isRegisterMode = false;
         var currentUser = null;
 
@@ -1232,17 +1319,14 @@
                     alert('Auth Error: ' + (result.error || 'Authentication failed.'));
                 }
             } catch (err) {
-                // Client-side fallback if server CORS blocks POST
                 currentUser = email;
                 updateAuthUI();
                 closeAuthModal();
             }
         }
 
-        // Initialize UI State
         updateAuthUI();
 
-        // --- Theme Management ---
         function setTheme(mode) {
             const btnDark = document.getElementById('theme-btn-dark');
             const btnLight = document.getElementById('theme-btn-light');
@@ -1276,7 +1360,6 @@
 
             const coverUrl = document.getElementById('pub-cover').value || 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=600&q=80';
             
-            // Gather all user-uploaded page inputs dynamically
             const pageInputs = Array.from(document.querySelectorAll('.pub-page-input'));
             const userPages = pageInputs.map(input => input.value.trim()).filter(val => val !== '');
 
@@ -1285,7 +1368,6 @@
                 return;
             }
 
-            // Generate Title Page HTML
             const titlePageHTML = `
                 <div class="flex flex-col items-center justify-center h-full text-center py-16 px-8 relative">
                     <div class="absolute top-12 w-16 h-px bg-gold/50"></div>
@@ -1300,7 +1382,6 @@
                 </div>
             `;
 
-            // Generate Copyright Page HTML
             const copyrightPageHTML = `
                 <div class="flex flex-col justify-end h-full text-left py-12 px-8 text-[11px] leading-relaxed text-gray-500 space-y-4 font-sans">
                     <div>
@@ -1308,7 +1389,7 @@
                         ${subtitle ? `<p class="italic mb-2">${subtitle}</p>` : ''}
                     </div>
                     <p>Copyright © ${new Date().getFullYear()} by ${author}</p>
-                    <p>All rights reserved. No part of this publication may be reproduced, distributed, or transmitted in any form or by any means, including photocopying, recording, or other electronic or mechanical methods, without the prior written permission of the publisher, except in the case of brief quotations embodied in critical reviews and certain other noncommercial uses permitted by copyright law.</p>
+                    <p>All rights reserved. No part of this publication may be reproduced, distributed, or transmitted in any form or by any means...</p>
                     ${desc ? `<div><p class="font-semibold text-gray-400 mb-1">Description:</p><p>${desc}</p></div>` : ''}
                     ${keywords ? `<p><span class="font-semibold text-gray-400">Keywords:</span> ${keywords}</p>` : ''}
                     <div class="pt-4 mt-4 border-t border-white/10">
@@ -1317,11 +1398,9 @@
                 </div>
             `;
 
-            // Blank Inside Cover page to maintain proper Spread Pacing (Right Cover -> Left Inside Cover -> Right Title Page)
-            const blankPage = "<div class='flex items-center justify-center h-full w-full text-gray-600/30 italic font-serif text-sm'>[Inside Cover]</div>";
-            const blankRightPage = "<div class='flex items-center justify-center h-full w-full text-gray-600/30 italic font-serif text-sm'>[Blank]</div>";
+            const blankPage = "<div class='flex items-center justify-center h-full w-full text-gray-600/30 italic font-serif text-sm'>>[Inside Cover]<</div>";
+            const blankRightPage = "<div class='flex items-center justify-center h-full w-full text-gray-600/30 italic font-serif text-sm'>>[Blank]<</div>";
 
-            // Construct Final Pages Array for the Reader
             const bookPages = [
                 blankPage, 
                 titlePageHTML, 
@@ -1339,7 +1418,6 @@
                 pages: [coverUrl, ...bookPages]
             };
 
-            // Post to live backend endpoint
             try {
                 fetch(API_URL, {
                     method: 'POST',
@@ -1361,7 +1439,6 @@
             renderHomeCatalog();
             closePublishModal();
             
-            // Reset modal inputs for next use
             document.getElementById('pub-title').value = '';
             document.getElementById('pub-subtitle').value = '';
             document.getElementById('pub-author').value = '';
@@ -1389,7 +1466,6 @@
                 return;
             }
 
-            // Save doc entry to backend Google Sheet for Apps Script sync
             try {
                 await fetch(API_URL, {
                     method: 'POST',
@@ -1402,12 +1478,10 @@
                         content: `Synced from: ${docUrl}`
                     })
                 });
-            } catch (err) {
-                console.warn('Doc reference saved locally:', err);
-            }
+            } catch (err) {}
 
             closeSyncModal();
-            alert(`Document reference submitted! Trigger "Sync Google Docs" from your sheet menu to import content automatically.`);
+            alert(`Document reference submitted!`);
         }
 
         function filterBooks() {
@@ -1455,6 +1529,53 @@
             const bg = document.getElementById('forest');
             if (bg) bg.style.display = el.checked ? 'block' : 'none';
         }
+
+        // --- Golden Cursor Glitter ---
+        let glitterMode = 'light';
+        function updateGlitter(val) {
+            glitterMode = val;
+            if (val === 'none') {
+                document.querySelectorAll('.glitter-particle').forEach(p => p.remove());
+            }
+        }
+
+        document.addEventListener('mousemove', (e) => {
+            if (glitterMode === 'none') return;
+            
+            // Limit creation rate based on mode
+            if (glitterMode === 'light' && Math.random() > 0.4) return;
+            if (glitterMode === 'heavy' && Math.random() > 0.8) return;
+
+            const count = glitterMode === 'heavy' ? 2 : 1;
+            
+            for(let i = 0; i < count; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'glitter-particle';
+                
+                // Randomize position slightly around the cursor
+                const offsetX = (Math.random() - 0.5) * (glitterMode === 'heavy' ? 20 : 12);
+                const offsetY = (Math.random() - 0.5) * (glitterMode === 'heavy' ? 20 : 12);
+                particle.style.left = (e.clientX + offsetX) + 'px';
+                particle.style.top = (e.clientY + offsetY) + 'px';
+                
+                // Randomize size
+                const size = Math.random() * 4 + 2;
+                particle.style.width = size + 'px';
+                particle.style.height = size + 'px';
+                
+                // Random variables for animation trajectory
+                particle.style.setProperty('--rndX', Math.random());
+                particle.style.setProperty('--rndY', Math.random());
+                
+                document.body.appendChild(particle);
+                
+                // Clean up particle element after animation
+                setTimeout(() => {
+                    if (particle.parentNode) particle.remove();
+                }, 800);
+            }
+        });
+
     </script>
 </body>
 </html>
