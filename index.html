@@ -203,6 +203,7 @@
         .rte-content blockquote { border-left: 4px solid #d2a85e !important; padding-left: 1rem !important; margin-left: 0 !important; color: #9ca3af !important; font-style: italic !important; }
         .rte-content img { display: inline-block !important; max-width: 100% !important; height: auto !important; }
         .rte-content p { margin-bottom: 0.75rem !important; }
+        .rte-content figure { margin: 1.5rem 0; }
         /* Table Styles for Visual Elements */
         .rte-content table { width: 100%; border-collapse: collapse; margin-bottom: 1rem; background: rgba(255,255,255,0.02); }
         .rte-content th, .rte-content td { border: 1px solid rgba(255,255,255,0.1); padding: 0.75rem; text-align: left; }
@@ -537,8 +538,12 @@
                 
                 <div class="w-px h-5 bg-white/10 mx-1"></div>
                 
-                <!-- Visual Elements Insert -->
-                <button type="button" onclick="addEditorImage()" class="w-8 h-8 rounded hover:bg-white/10 flex items-center justify-center text-gold transition" title="Insert Image"><i class="fa-regular fa-image"></i></button>
+                <!-- Cloudinary / Story Image Insertion -->
+                <button type="button" onclick="openCloudinaryModal()" class="px-2 py-1 rounded hover:bg-white/10 flex items-center space-x-1.5 text-gold border border-gold/30 bg-gold/10 transition" title="Insert Cloudinary Story Image">
+                    <i class="fa-solid fa-cloud-arrow-up text-xs"></i>
+                    <span class="text-xs font-semibold">Cloudinary Image</span>
+                </button>
+                
                 <button type="button" onclick="insertTable()" class="w-8 h-8 rounded hover:bg-white/10 flex items-center justify-center text-gold transition" title="Insert Table"><i class="fa-solid fa-table"></i></button>
                 <div class="relative inline-block text-left">
                     <button type="button" onclick="document.getElementById('shapes-menu').classList.toggle('hidden')" class="w-8 h-8 rounded hover:bg-white/10 flex items-center justify-center text-gold transition" title="Insert Shapes/Visuals"><i class="fa-solid fa-shapes"></i></button>
@@ -570,6 +575,56 @@
         <!-- Editor Canvas Area -->
         <div class="flex-1 overflow-y-auto p-4 md:p-8 flex justify-center bg-[#05070a] custom-scrollbar relative">
             <div id="a4-canvas" contenteditable="true" spellcheck="true" class="bg-[#12151c] text-gray-200 w-full max-w-[800px] aspect-[1/1.414] shadow-2xl p-8 outline-none font-serif overflow-y-auto text-sm leading-relaxed border border-white/5 rte-content custom-scrollbar transition-all" style="min-height: 800px; line-height: 1.5; padding: 2rem;">
+            </div>
+        </div>
+    </div>
+
+    <!-- CLOUDINARY STORY IMAGE INSERTION MODAL -->
+    <div id="cloudinary-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[70] hidden flex items-center justify-center p-4">
+        <div class="bg-neutral-900 border border-white/10 rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl flex flex-col">
+            <div class="p-6 border-b border-white/10 flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                    <i class="fa-solid fa-cloud-arrow-up text-gold text-lg"></i>
+                    <h3 class="font-serif font-bold text-lg text-white">Insert Cloudinary Story Image</h3>
+                </div>
+                <button onclick="closeCloudinaryModal()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <div class="p-6 space-y-4">
+                <div>
+                    <label class="block text-xs font-medium text-gray-400 mb-1">Cloudinary Image Link / URL *</label>
+                    <input type="text" id="cld-img-url" placeholder="https://res.cloudinary.com/your-cloud-name/image/upload/sample.jpg" class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:border-gold outline-none">
+                    <p class="text-[10px] text-gray-500 mt-1">Paste your direct Cloudinary link or any hosted image web link.</p>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-400 mb-1">Image Caption / Subtitle</label>
+                    <input type="text" id="cld-img-caption" placeholder="e.g. Map of the Whispering Woods" class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:border-gold outline-none">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-medium text-gray-400 mb-1">Position in Story</label>
+                        <select id="cld-img-align" class="w-full bg-black/50 border border-white/10 rounded-xl px-3 py-2.5 text-sm text-white focus:border-gold outline-none cursor-pointer">
+                            <option value="center" selected>Center (Middle of Page)</option>
+                            <option value="left">Left Aligned (Wrapped)</option>
+                            <option value="right">Right Aligned (Wrapped)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-400 mb-1">Image Display Width</label>
+                        <select id="cld-img-size" class="w-full bg-black/50 border border-white/10 rounded-xl px-3 py-2.5 text-sm text-white focus:border-gold outline-none cursor-pointer">
+                            <option value="85%" selected>85% (Medium Centered)</option>
+                            <option value="100%">100% (Full Width)</option>
+                            <option value="60%">60% (Compact)</option>
+                            <option value="40%">40% (Small)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="p-6 border-t border-white/10 flex items-center justify-end space-x-3 bg-black/30">
+                <button onclick="closeCloudinaryModal()" class="px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-xs text-gray-300 hover:bg-white/10">Cancel</button>
+                <button onclick="insertCloudinaryImage()" class="px-6 py-2 rounded-xl bg-gold text-black text-xs font-semibold hover:bg-darkgold shadow-lg shadow-gold/20 flex items-center space-x-1.5">
+                    <i class="fa-solid fa-image"></i>
+                    <span>Place in Story</span>
+                </button>
             </div>
         </div>
     </div>
@@ -615,7 +670,7 @@
     <script>
         var API_URL = 'https://script.google.com/macros/s/AKfycbzhRZm0qBCQv7wjvbeuCZBY4sNY_wNFXz0HeLcZLmh9tP0ZJZDxpzdMoYa8l36Yg0j-6A/exec';
 
-        // --- Custom Alert/Confirm System to avoid native browser dialogs ---
+        // --- Custom Alert/Confirm System ---
         let msgResolveCallback = null;
         function showCustomModal(title, message, isConfirm, iconClass = "fa-solid fa-circle-info", resolve = null) {
             document.getElementById('msg-title').innerText = title;
@@ -1043,12 +1098,55 @@
             if (setting === 'lineHeight') canvas.style.lineHeight = value;
         }
 
-        function addEditorImage() {
-            const url = prompt("Enter Image URL (e.g., https://example.com/image.jpg):");
-            if (url) {
-                let size = prompt("Enter Image Width (e.g., 100%, 300px, 50%):", "100%") || "100%";
-                document.execCommand('insertHTML', false, `<img src="${url}" style="width: ${size}; max-width: 100%; height: auto;" />`);
+        // --- CLOUDINARY STORY IMAGE INSERTION SYSTEM ---
+        function openCloudinaryModal() {
+            document.getElementById('cld-img-url').value = '';
+            document.getElementById('cld-img-caption').value = '';
+            document.getElementById('cld-img-align').value = 'center';
+            document.getElementById('cld-img-size').value = '85%';
+            document.getElementById('cloudinary-modal').classList.remove('hidden');
+            document.getElementById('cloudinary-modal').classList.add('flex');
+            setTimeout(() => document.getElementById('cld-img-url').focus(), 100);
+        }
+
+        function closeCloudinaryModal() {
+            document.getElementById('cloudinary-modal').classList.add('hidden');
+            document.getElementById('cloudinary-modal').classList.remove('flex');
+        }
+
+        function insertCloudinaryImage() {
+            const url = document.getElementById('cld-img-url').value.trim();
+            const caption = document.getElementById('cld-img-caption').value.trim();
+            const align = document.getElementById('cld-img-align').value;
+            const size = document.getElementById('cld-img-size').value;
+
+            if (!url) {
+                customAlert("Please enter a valid Cloudinary image URL.");
+                return;
             }
+
+            let marginStyle = "margin: 1.5rem auto;";
+            let floatStyle = "";
+            if (align === "left") {
+                floatStyle = "float: left; margin: 0.5rem 1.5rem 1rem 0;";
+            } else if (align === "right") {
+                floatStyle = "float: right; margin: 0.5rem 0 1rem 1.5rem;";
+            } else {
+                marginStyle = "margin: 1.5rem auto; text-align: center;";
+            }
+
+            let figureHTML = `
+                <figure style="text-align: center; ${marginStyle} ${floatStyle} max-width: 100%; display: block;" class="story-image-container">
+                    <img src="${url}" alt="${caption || 'Story Image'}" style="width: ${size}; max-width: 100%; height: auto; border-radius: 10px; border: 1px solid rgba(210,168,94,0.3); display: inline-block; box-shadow: 0 8px 20px rgba(0,0,0,0.4);" onerror="this.onerror=null; this.src='https://placehold.co/800x500/12151c/d2a85e?text=Image+Load+Failed';" />
+                    ${caption ? `<figcaption style="font-size: 0.825rem; color: #9ca3af; font-style: italic; margin-top: 0.5rem; text-align: center;">${caption}</figcaption>` : ''}
+                </figure>
+                <p><br></p>
+            `;
+
+            closeCloudinaryModal();
+            const canvas = document.getElementById('a4-canvas');
+            canvas.focus();
+            document.execCommand('insertHTML', false, figureHTML);
         }
 
         function insertTable() {
@@ -1346,28 +1444,11 @@
             const grid = document.getElementById('books-grid');
             if (!grid) return;
             if (filtered.length === 0) {
-                grid.innerHTML = `<div class="col-span-full flex flex-col items-center justify-center text-center py-16 text-gray-500 border-2 border-dashed border-white/10 rounded-2xl"><i class="fa-solid fa-magnifying-glass text-3xl mb-4 text-white/20"></i><p class="font-serif text-lg text-white mb-2">No books found</p><p class="text-xs">Try adjusting your search or category filters.</p></div>`; return;
+                grid.innerHTML = `<div class="col-span-full flex flex-col items-center justify-center text-center py-16 text-gray-500 border-2 border-dashed border-white/10 rounded-2xl"><i class="fa-solid fa-magnifying-glass text-3xl mb-4 text-white/20"></i><p class="font-serif text-lg text-white mb-2">No books found</p><p class="text-xs">Try adjusting your search or category filters.</p></div>`;
+                return;
             }
             grid.innerHTML = filtered.map(book => generateBookCardHTML(book)).join('');
         }
-
-        document.addEventListener('mousemove', (e) => {
-            const count = 1;
-            if (Math.random() > 0.4) return;
-            for(let i = 0; i < count; i++) {
-                const particle = document.createElement('div');
-                particle.className = 'glitter-particle';
-                const offsetX = (Math.random() - 0.5) * 12;
-                const offsetY = (Math.random() - 0.5) * 12;
-                particle.style.left = (e.clientX + offsetX) + 'px'; particle.style.top = (e.clientY + offsetY) + 'px';
-                const size = Math.random() * 4 + 2;
-                particle.style.width = size + 'px'; particle.style.height = size + 'px';
-                particle.style.setProperty('--rndX', Math.random()); particle.style.setProperty('--rndY', Math.random());
-                document.body.appendChild(particle);
-                setTimeout(() => { if (particle.parentNode) particle.remove(); }, 800);
-            }
-        });
-
     </script>
 </body>
 </html>
