@@ -239,6 +239,24 @@
             100% { opacity: 0; transform: scale(0.1) translate(calc(-20px + 40px * var(--rndX)), calc(20px + 20px * var(--rndY))); }
         }
 
+        /* RTE Content Styles for WYSIWYG Editor */
+        .rte-content ul { list-style-type: disc !important; padding-left: 1.5rem !important; margin-bottom: 1rem !important; }
+        .rte-content ol { list-style-type: decimal !important; padding-left: 1.5rem !important; margin-bottom: 1rem !important; }
+        .rte-content b, .rte-content strong { font-weight: bold !important; }
+        .rte-content i, .rte-content em { font-style: italic !important; }
+        .rte-content u { text-decoration: underline !important; }
+        .rte-content strike, .rte-content s { text-decoration: line-through !important; }
+        .rte-content blockquote { border-left: 4px solid #d2a85e !important; padding-left: 1rem !important; margin-left: 0 !important; color: #9ca3af !important; font-style: italic !important; }
+        .rte-content img { display: inline-block !important; max-width: 100% !important; height: auto !important; }
+        .rte-content p { margin-bottom: 0.75rem !important; }
+        .rte-content font[size="1"] { font-size: 0.75rem !important; }
+        .rte-content font[size="2"] { font-size: 0.875rem !important; }
+        .rte-content font[size="3"] { font-size: 1rem !important; }
+        .rte-content font[size="4"] { font-size: 1.125rem !important; }
+        .rte-content font[size="5"] { font-size: 1.25rem !important; }
+        .rte-content font[size="6"] { font-size: 1.5rem !important; }
+        .rte-content font[size="7"] { font-size: 2rem !important; }
+
     </style>
 </head>
 <body class="h-screen w-screen overflow-hidden relative">
@@ -508,7 +526,7 @@
     <div id="publish-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="bg-neutral-900 border border-white/10 rounded-3xl w-full max-w-2xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
             <div class="p-6 border-b border-white/10 flex items-center justify-between">
-                <h3 class="font-serif font-bold text-lg text-white">Publish a Book or Manga</h3>
+                <h3 id="publish-modal-title" class="font-serif font-bold text-lg text-white">Publish a Book or Manga</h3>
                 <button onclick="closePublishModal()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
             <div class="p-6 overflow-y-auto space-y-5 flex-1 custom-scrollbar">
@@ -569,14 +587,10 @@
                 </div>
                 <div>
                     <label class="block text-xs font-medium text-gray-400 mb-2">Book Pages (Add Image URLs or Text)</label>
-                    <div id="pub-pages-container" class="space-y-2 max-h-48 overflow-y-auto pr-2 custom-scrollbar">
-                        <div class="flex items-start space-x-2 page-input-row">
-                            <span class="text-xs text-gray-500 font-mono w-4 pt-3 page-number">1.</span>
-                            <textarea rows="1" class="pub-page-input w-full bg-black/50 border border-white/10 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-gold font-mono text-xs resize-y" placeholder="https://image-link.jpg or page text..."></textarea>
-                            <button onclick="removePageInput(this)" class="mt-2 text-gray-500 hover:text-red-400 transition" title="Remove Page"><i class="fa-solid fa-trash"></i></button>
-                        </div>
+                    <div id="pub-pages-container" class="space-y-2 max-h-64 overflow-y-auto pr-2 custom-scrollbar">
+                        <!-- Populated dynamically by createPageRow() -->
                     </div>
-                    <button onclick="addPageInput()" class="mt-3 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-xs text-gold hover:bg-white/10 transition flex items-center space-x-2">
+                    <button onclick="addPageInput('')" class="mt-3 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-xs text-gold hover:bg-white/10 transition flex items-center space-x-2">
                         <i class="fa-solid fa-plus"></i>
                         <span>Add Another Page</span>
                     </button>
@@ -585,6 +599,46 @@
             <div class="p-6 border-t border-white/10 flex items-center justify-end space-x-3 bg-black/30">
                 <button onclick="closePublishModal()" class="px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-xs text-gray-300 hover:bg-white/10">Cancel</button>
                 <button onclick="submitBook()" class="px-6 py-2 rounded-xl bg-gold text-black text-xs font-semibold hover:bg-darkgold shadow-lg shadow-gold/20">Publish Now</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- A4 WYSIWYG EDITOR MODAL -->
+    <div id="a4-editor-modal" class="fixed inset-0 bg-black/95 backdrop-blur-sm z-[60] hidden flex-col">
+        <!-- Toolbar -->
+        <div class="h-16 bg-neutral-900 border-b border-white/10 flex items-center justify-between px-4 z-10 shrink-0">
+            <div class="flex items-center space-x-1 overflow-x-auto custom-scrollbar pb-1">
+                <button type="button" onclick="formatText('bold')" class="w-8 h-8 rounded hover:bg-white/10 flex items-center justify-center text-gray-300 hover:text-white transition" title="Bold"><i class="fa-solid fa-bold"></i></button>
+                <button type="button" onclick="formatText('italic')" class="w-8 h-8 rounded hover:bg-white/10 flex items-center justify-center text-gray-300 hover:text-white transition" title="Italic"><i class="fa-solid fa-italic"></i></button>
+                <button type="button" onclick="formatText('underline')" class="w-8 h-8 rounded hover:bg-white/10 flex items-center justify-center text-gray-300 hover:text-white transition" title="Underline"><i class="fa-solid fa-underline"></i></button>
+                <div class="w-px h-6 bg-white/10 mx-1"></div>
+                <button type="button" onclick="formatText('justifyLeft')" class="w-8 h-8 rounded hover:bg-white/10 flex items-center justify-center text-gray-300 hover:text-white transition" title="Align Left"><i class="fa-solid fa-align-left"></i></button>
+                <button type="button" onclick="formatText('justifyCenter')" class="w-8 h-8 rounded hover:bg-white/10 flex items-center justify-center text-gray-300 hover:text-white transition" title="Align Center"><i class="fa-solid fa-align-center"></i></button>
+                <button type="button" onclick="formatText('justifyRight')" class="w-8 h-8 rounded hover:bg-white/10 flex items-center justify-center text-gray-300 hover:text-white transition" title="Align Right"><i class="fa-solid fa-align-right"></i></button>
+                <div class="w-px h-6 bg-white/10 mx-1"></div>
+                <button type="button" onclick="formatText('insertUnorderedList')" class="w-8 h-8 rounded hover:bg-white/10 flex items-center justify-center text-gray-300 hover:text-white transition" title="Bullet List"><i class="fa-solid fa-list-ul"></i></button>
+                <button type="button" onclick="formatText('insertOrderedList')" class="w-8 h-8 rounded hover:bg-white/10 flex items-center justify-center text-gray-300 hover:text-white transition" title="Numbered List"><i class="fa-solid fa-list-ol"></i></button>
+                <div class="w-px h-6 bg-white/10 mx-1"></div>
+                <select onchange="formatText('fontSize', this.value); this.selectedIndex=2;" class="bg-black/50 border border-white/10 text-gray-300 rounded-lg px-2 py-1 text-xs focus:outline-none focus:border-gold h-8 cursor-pointer">
+                    <option value="1">Size: XS</option>
+                    <option value="2">Size: S</option>
+                    <option value="3" selected>Size: Normal</option>
+                    <option value="4">Size: L</option>
+                    <option value="5">Size: XL</option>
+                    <option value="6">Size: XXL</option>
+                </select>
+                <div class="w-px h-6 bg-white/10 mx-1"></div>
+                <button type="button" onclick="addEditorImage()" class="w-8 h-8 rounded hover:bg-white/10 flex items-center justify-center text-gold hover:text-white transition" title="Insert Image"><i class="fa-regular fa-image"></i></button>
+            </div>
+            <div class="flex items-center space-x-3 shrink-0 ml-4">
+                <button onclick="closeA4Editor()" class="px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-xs text-gray-300 hover:bg-white/10 transition">Cancel</button>
+                <button onclick="saveA4Editor()" class="px-4 py-2 rounded-xl bg-gold text-black text-xs font-semibold hover:bg-darkgold shadow-lg shadow-gold/20 transition">Save Page</button>
+            </div>
+        </div>
+        <!-- Editor Canvas Area -->
+        <div class="flex-1 overflow-y-auto p-4 md:p-8 flex justify-center bg-[#05070a] custom-scrollbar">
+            <!-- Canvas exactly matching reader style -->
+            <div id="a4-canvas" contenteditable="true" class="bg-[#12151c] text-gray-200 w-full max-w-[800px] aspect-[1/1.414] shadow-2xl p-8 outline-none font-serif overflow-y-auto text-sm leading-relaxed border border-white/5 rte-content custom-scrollbar" style="min-height: 800px;">
             </div>
         </div>
     </div>
@@ -622,6 +676,10 @@
                 <button onclick="closeAuthModal()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
             <div class="p-6 space-y-4">
+                <div id="auth-name-group" class="hidden">
+                    <label class="block text-xs font-medium text-gray-400 mb-1">Full Name</label>
+                    <input type="text" id="auth-name" placeholder="John Doe" class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-gold">
+                </div>
                 <div>
                     <label class="block text-xs font-medium text-gray-400 mb-1">Email Address</label>
                     <input type="email" id="auth-email" placeholder="reader@example.com" class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-gold">
@@ -705,6 +763,7 @@
         var currentBook = null;
         var currentPageIndex = 0; // Spread index on desktop
         var isPseudoFullscreen = false;
+        var editingBookId = null;
 
         // Zoom and Pan State (Desktop 3D)
         let currentScale = 1;
@@ -758,6 +817,24 @@
             closeSidebarOnMobile();
         }
 
+        function generateBookCardHTML(book) {
+            return `
+                <div onclick="openReader('${book.id}')" class="book-card relative group cursor-pointer bg-neutral-900 border border-white/10 rounded-2xl p-3 flex flex-col space-y-3 transition duration-300">
+                    <img src="${book.coverUrl}" alt="${book.title}" onerror="this.onerror=null; this.src='https://placehold.co/600x900/12151c/d2a85e?text=Cover+Unavailable';" class="w-full rounded-xl shadow-md">
+                    <div class="overflow-hidden">
+                        <span class="text-[10px] text-gold font-semibold uppercase tracking-wider block truncate w-full">${book.genre}</span>
+                        <h4 class="font-serif font-bold text-sm text-white truncate mt-0.5">${book.title}</h4>
+                    </div>
+                    ${currentUser && book.authorEmail === currentUser.email ? `
+                        <div class="absolute top-4 right-4 flex space-x-1 opacity-0 group-hover:opacity-100 transition-opacity z-20">
+                            <button onclick="editBookBtn(event, '${book.id}')" class="w-8 h-8 rounded-lg bg-black/80 text-gold hover:bg-black flex items-center justify-center border border-white/20 shadow-lg backdrop-blur-sm transition" title="Edit Book"><i class="fa-solid fa-pen text-xs"></i></button>
+                            <button onclick="deleteBookBtn(event, '${book.id}')" class="w-8 h-8 rounded-lg bg-black/80 text-red-400 hover:bg-black flex items-center justify-center border border-white/20 shadow-lg backdrop-blur-sm transition" title="Delete Book"><i class="fa-solid fa-trash text-xs"></i></button>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+        }
+
         function renderHomeCatalog() {
             const grid = document.getElementById('books-grid');
             const fullGrid = document.getElementById('full-books-grid');
@@ -773,15 +850,7 @@
                 return;
             }
 
-            const html = books.map(book => `
-                <div onclick="openReader('${book.id}')" class="book-card cursor-pointer bg-neutral-900 border border-white/10 rounded-2xl p-3 flex flex-col space-y-3 transition duration-300">
-                    <img src="${book.coverUrl}" alt="${book.title}" onerror="this.onerror=null; this.src='https://placehold.co/600x900/12151c/d2a85e?text=Cover+Unavailable';" class="w-full rounded-xl shadow-md">
-                    <div class="overflow-hidden">
-                        <span class="text-[10px] text-gold font-semibold uppercase tracking-wider block truncate w-full">${book.genre}</span>
-                        <h4 class="font-serif font-bold text-sm text-white truncate mt-0.5">${book.title}</h4>
-                    </div>
-                </div>
-            `).join('');
+            const html = books.map(book => generateBookCardHTML(book)).join('');
 
             if (grid) grid.innerHTML = html;
             if (fullGrid) fullGrid.innerHTML = html;
@@ -790,6 +859,13 @@
 
         // --- Reader Engine (Hybrid 3D / Mobile Scroll) ---
         function openReader(bookId) {
+            if (!currentUser) {
+                alert("Please log in to read books.");
+                openAuthModal();
+                forceAuthMode('login');
+                return;
+            }
+
             currentBook = books.find(b => b.id === bookId);
             if (!currentBook) return;
 
@@ -932,9 +1008,9 @@
                     </div>`;
             }
 
-            // 3. HTML Content Tag
+            // 3. HTML Content Tag (Updated to include rte-content)
             if (/<[a-z][\s\S]*>/i.test(trimmed)) {
-                return `<div class="w-full h-full p-6 overflow-y-auto font-serif text-gray-200 leading-relaxed text-sm">${trimmed}</div>`;
+                return `<div class="w-full h-full p-6 overflow-y-auto font-serif text-gray-200 leading-relaxed text-sm rte-content">${trimmed}</div>`;
             }
 
             // 4. Formatted Plain Text
@@ -1205,25 +1281,159 @@
             `).join('');
         }
 
-        function openPublishModal() { document.getElementById('publish-modal').classList.remove('hidden'); }
+        let activeEditorInput = null;
+        let activeEditorPreview = null;
+
+        function openA4Editor(btn) {
+            const row = btn.closest('.page-input-row');
+            activeEditorInput = row.querySelector('.pub-page-hidden-input');
+            activeEditorPreview = row.querySelector('.pub-page-preview');
+            
+            const canvas = document.getElementById('a4-canvas');
+            canvas.innerHTML = activeEditorInput.value;
+            
+            document.getElementById('a4-editor-modal').classList.remove('hidden');
+            document.getElementById('a4-editor-modal').classList.add('flex');
+            canvas.focus();
+        }
+
+        function closeA4Editor() {
+            document.getElementById('a4-editor-modal').classList.add('hidden');
+            document.getElementById('a4-editor-modal').classList.remove('flex');
+            activeEditorInput = null;
+            activeEditorPreview = null;
+        }
+
+        function saveA4Editor() {
+            if (!activeEditorInput) return;
+            const canvas = document.getElementById('a4-canvas');
+            const content = canvas.innerHTML;
+            activeEditorInput.value = content;
+            
+            // Generate clean preview snippet
+            let previewText = canvas.textContent || canvas.innerText || '';
+            if (previewText.length > 40) previewText = previewText.substring(0, 40) + '...';
+            if (!previewText.trim() && content.includes('<img')) previewText = '[Image Content]';
+            if (!previewText.trim()) previewText = 'Empty Page...';
+            
+            activeEditorPreview.innerText = previewText;
+            
+            closeA4Editor();
+        }
+
+        function formatText(command, value = null) {
+            document.execCommand(command, false, value);
+            document.getElementById('a4-canvas').focus();
+        }
+
+        function addEditorImage() {
+            const url = prompt("Enter Image URL (e.g., https://example.com/image.jpg):");
+            if (url) {
+                let size = prompt("Enter Image Width (e.g., 100%, 300px, 50%):", "100%");
+                if (!size) size = "100%";
+                const imgHTML = `<img src="${url}" style="width: ${size}; max-width: 100%; height: auto;" />`;
+                document.execCommand('insertHTML', false, imgHTML);
+            }
+        }
+
+        function createPageRow(content = '', index = 1) {
+            const tmp = document.createElement('div');
+            tmp.innerHTML = content;
+            let previewText = tmp.textContent || tmp.innerText || '';
+            if (previewText.length > 40) previewText = previewText.substring(0, 40) + '...';
+            if (!previewText.trim() && content.includes('<img')) previewText = '[Image Content]';
+            if (!previewText.trim()) previewText = 'Empty Page...';
+
+            const encodedContent = content.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+
+            return `
+                <div class="flex flex-col space-y-2 page-input-row bg-black/40 p-3 rounded-xl border border-white/5">
+                    <div class="flex items-center justify-between mb-1">
+                        <span class="text-[10px] text-gold font-bold uppercase tracking-wider page-number">Page ${index}</span>
+                        <button type="button" onclick="removePageInput(this)" class="text-gray-500 hover:text-red-400 transition" title="Remove Page"><i class="fa-solid fa-trash text-xs"></i></button>
+                    </div>
+                    <div class="flex space-x-2 items-center">
+                        <div class="flex-1 bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-xs text-gray-400 overflow-hidden whitespace-nowrap text-ellipsis pub-page-preview">
+                            ${previewText}
+                        </div>
+                        <input type="hidden" class="pub-page-hidden-input" value="${encodedContent}">
+                        <button type="button" onclick="openA4Editor(this)" class="px-3 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg text-xs transition flex items-center space-x-1.5 shrink-0 border border-white/10">
+                            <i class="fa-solid fa-pen-to-square"></i><span class="hidden sm:inline">Edit</span>
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function openPublishModal(editId = null) { 
+            if (!currentUser) {
+                alert("Please log in to publish or edit books.");
+                openAuthModal();
+                forceAuthMode('login');
+                return;
+            }
+
+            editingBookId = typeof editId === 'string' ? editId : null;
+            const titleEl = document.getElementById('publish-modal-title');
+            const container = document.getElementById('pub-pages-container');
+            container.innerHTML = ''; // Reset container
+            
+            if (editingBookId) {
+                const book = books.find(b => b.id === editingBookId);
+                if (book) {
+                    titleEl.innerText = "Edit Book";
+                    document.getElementById('pub-title').value = book.title || '';
+                    document.getElementById('pub-cover').value = book.coverUrl || '';
+                    document.getElementById('pub-author').value = currentUser.name || currentUser.email;
+                    
+                    // User pages usually start at index 3 (cover, title, copyright)
+                    let userPages = book.pages.slice(3);
+                    if (userPages.length === 0) {
+                        addPageInput('');
+                    } else {
+                        userPages.forEach(p => addPageInput(p));
+                    }
+                }
+            } else {
+                titleEl.innerText = "Publish a Book or Manga";
+                document.getElementById('pub-title').value = '';
+                document.getElementById('pub-cover').value = '';
+                document.getElementById('pub-author').value = currentUser.name || currentUser.email;
+                addPageInput('');
+            }
+
+            document.getElementById('publish-modal').classList.remove('hidden'); 
+        }
+
+        function editBookBtn(e, bookId) {
+            e.stopPropagation();
+            openPublishModal(bookId);
+        }
+
+        function deleteBookBtn(e, bookId) {
+            e.stopPropagation();
+            if (confirm("Are you sure you want to delete this book? This action cannot be undone.")) {
+                books = books.filter(b => b.id !== bookId);
+                renderHomeCatalog();
+                if (!document.getElementById('view-library').classList.contains('hidden')) {
+                    filterCategory('All'); 
+                }
+            }
+        }
+
         function closePublishModal() { document.getElementById('publish-modal').classList.add('hidden'); }
         function openSyncModal() { document.getElementById('sync-modal').classList.remove('hidden'); }
         function closeSyncModal() { document.getElementById('sync-modal').classList.add('hidden'); }
         function openAuthModal() { document.getElementById('auth-modal').classList.remove('hidden'); }
         function closeAuthModal() { document.getElementById('auth-modal').classList.add('hidden'); }
 
-        function addPageInput() {
+        function addPageInput(content = '') {
             const container = document.getElementById('pub-pages-container');
             const rowCount = container.querySelectorAll('.page-input-row').length + 1;
             
-            const row = document.createElement('div');
-            row.className = 'flex items-start space-x-2 page-input-row';
-            row.innerHTML = `
-                <span class="text-xs text-gray-500 font-mono w-4 pt-3 page-number">${rowCount}.</span>
-                <textarea rows="1" class="pub-page-input w-full bg-black/50 border border-white/10 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-gold font-mono text-xs resize-y" placeholder="https://image-link.jpg or page text..."></textarea>
-                <button onclick="removePageInput(this)" class="mt-2 text-gray-500 hover:text-red-400 transition" title="Remove Page"><i class="fa-solid fa-trash"></i></button>
-            `;
-            container.appendChild(row);
+            const div = document.createElement('div');
+            div.innerHTML = createPageRow(content, rowCount);
+            container.appendChild(div.firstElementChild);
             container.scrollTop = container.scrollHeight;
         }
 
@@ -1237,7 +1447,7 @@
             
             const rows = container.querySelectorAll('.page-input-row');
             rows.forEach((row, index) => {
-                row.querySelector('.page-number').innerText = (index + 1) + '.';
+                row.querySelector('.page-number').innerText = 'Page ' + (index + 1);
             });
         }
 
@@ -1248,12 +1458,14 @@
             isRegisterMode = !isRegisterMode;
             document.getElementById('auth-title').innerText = isRegisterMode ? 'Create Account' : 'Log In to Ink & Light';
             document.getElementById('auth-switch-btn').innerText = isRegisterMode ? 'Already have an account? Log In' : 'Need an account? Register';
+            document.getElementById('auth-name-group').classList.toggle('hidden', !isRegisterMode);
         }
 
         function forceAuthMode(mode) {
             isRegisterMode = mode === 'register';
             document.getElementById('auth-title').innerText = isRegisterMode ? 'Create Account' : 'Log In to Ink & Light';
             document.getElementById('auth-switch-btn').innerText = isRegisterMode ? 'Already have an account? Log In' : 'Need an account? Register';
+            document.getElementById('auth-name-group').classList.toggle('hidden', !isRegisterMode);
         }
 
         function updateAuthUI() {
@@ -1261,12 +1473,13 @@
             const settingsAuth = document.getElementById('settings-auth-container');
             
             if (currentUser) {
-                if(headerAuth) headerAuth.innerHTML = `<span class="text-xs text-gold font-medium px-3 py-1.5"><i class="fa-solid fa-user-check mr-1"></i> ${currentUser}</span>`;
+                const displayName = currentUser.name || currentUser.email;
+                if(headerAuth) headerAuth.innerHTML = `<span class="text-xs text-gold font-medium px-3 py-1.5"><i class="fa-solid fa-user-check mr-1"></i> ${displayName}</span>`;
                 if(settingsAuth) {
                     settingsAuth.innerHTML = `
                         <div class="flex items-center justify-between">
                             <div>
-                                <p class="text-sm text-white font-medium">Logged in as: <span class="text-gold">${currentUser}</span></p>
+                                <p class="text-sm text-white font-medium">Logged in as: <span class="text-gold">${displayName}</span></p>
                             </div>
                             <button onclick="logout()" class="px-4 py-2 rounded-xl bg-white/5 border border-white/10 hover:bg-red-500/20 hover:text-red-400 text-xs text-white transition">Log Out</button>
                         </div>`;
@@ -1281,6 +1494,11 @@
                         </div>`;
                 }
             }
+
+            renderHomeCatalog();
+            if (!document.getElementById('view-library').classList.contains('hidden')) {
+                filterCategory('All'); 
+            }
         }
 
         function logout() {
@@ -1291,17 +1509,24 @@
         async function handleAuthSubmit() {
             const email = document.getElementById('auth-email').value;
             const password = document.getElementById('auth-password').value;
+            const name = document.getElementById('auth-name').value;
 
             if (!email || !password) { 
                 alert('Please enter your email and password.'); 
                 return; 
             }
 
+            if (isRegisterMode && !name) {
+                alert('Please enter your full name to register.');
+                return;
+            }
+
             try {
                 const payload = {
                     action: isRegisterMode ? 'register' : 'login',
                     email: email,
-                    password: password
+                    password: password,
+                    name: name
                 };
 
                 const res = await fetch(API_URL, {
@@ -1312,14 +1537,14 @@
                 const result = await res.json();
 
                 if (result.success) {
-                    currentUser = email;
+                    currentUser = { email: email, name: isRegisterMode ? name : (result.name || email.split('@')[0]) };
                     updateAuthUI();
                     closeAuthModal();
                 } else {
                     alert('Auth Error: ' + (result.error || 'Authentication failed.'));
                 }
             } catch (err) {
-                currentUser = email;
+                currentUser = { email: email, name: isRegisterMode ? name : email.split('@')[0] };
                 updateAuthUI();
                 closeAuthModal();
             }
@@ -1360,7 +1585,7 @@
 
             const coverUrl = document.getElementById('pub-cover').value || 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=600&q=80';
             
-            const pageInputs = Array.from(document.querySelectorAll('.pub-page-input'));
+            const pageInputs = Array.from(document.querySelectorAll('.pub-page-hidden-input'));
             const userPages = pageInputs.map(input => input.value.trim()).filter(val => val !== '');
 
             if (!title || userPages.length === 0) {
@@ -1410,34 +1635,50 @@
 
             const rawContent = bookPages.join(' ||PAGE|| ');
 
-            const newBook = {
-                id: 'bk_' + Date.now(),
-                title,
-                genre,
-                coverUrl,
-                pages: [coverUrl, ...bookPages]
-            };
+            if (editingBookId) {
+                const bIndex = books.findIndex(b => b.id === editingBookId);
+                if (bIndex > -1) {
+                    books[bIndex].title = title;
+                    books[bIndex].genre = genre;
+                    books[bIndex].coverUrl = coverUrl;
+                    books[bIndex].pages = [coverUrl, ...bookPages];
+                }
+                openReader(editingBookId);
+            } else {
+                const newBook = {
+                    id: 'bk_' + Date.now(),
+                    title,
+                    genre,
+                    coverUrl,
+                    authorEmail: currentUser.email,
+                    pages: [coverUrl, ...bookPages]
+                };
 
-            try {
-                fetch(API_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                    body: JSON.stringify({
-                        action: 'publish',
-                        bookId: newBook.id,
-                        title: title,
-                        genre: genre,
-                        coverUrl: coverUrl,
-                        content: rawContent
-                    })
-                });
-            } catch (err) {
-                console.warn('Published locally, API post skipped:', err);
+                try {
+                    fetch(API_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                        body: JSON.stringify({
+                            action: 'publish',
+                            bookId: newBook.id,
+                            title: title,
+                            genre: genre,
+                            coverUrl: coverUrl,
+                            authorEmail: currentUser.email,
+                            content: rawContent
+                        })
+                    });
+                } catch (err) {
+                    console.warn('Published locally, API post skipped:', err);
+                }
+
+                books.unshift(newBook);
+                openReader(newBook.id);
             }
 
-            books.unshift(newBook);
             renderHomeCatalog();
             closePublishModal();
+            editingBookId = null;
             
             document.getElementById('pub-title').value = '';
             document.getElementById('pub-subtitle').value = '';
@@ -1447,12 +1688,10 @@
             document.getElementById('pub-cover').value = '';
             document.getElementById('pub-copyright').checked = true;
             document.querySelectorAll('.selected-genre').forEach(pill => toggleGenre(pill));
-            document.getElementById('pub-pages-container').innerHTML = `
-                <div class="flex items-start space-x-2 page-input-row">
-                    <span class="text-xs text-gray-500 font-mono w-4 pt-3 page-number">1.</span>
-                    <textarea rows="1" class="pub-page-input w-full bg-black/50 border border-white/10 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-gold font-mono text-xs resize-y" placeholder="https://image-link.jpg or page text..."></textarea>
-                    <button onclick="removePageInput(this)" class="mt-2 text-gray-500 hover:text-red-400 transition" title="Remove Page"><i class="fa-solid fa-trash"></i></button>
-                </div>`;
+            
+            const container = document.getElementById('pub-pages-container');
+            container.innerHTML = '';
+            addPageInput('');
 
             openReader(newBook.id);
         }
@@ -1514,15 +1753,7 @@
                 return;
             }
 
-            grid.innerHTML = filtered.map(book => `
-                <div onclick="openReader('${book.id}')" class="book-card cursor-pointer bg-neutral-900 border border-white/10 rounded-2xl p-3 flex flex-col space-y-3 transition duration-300">
-                    <img src="${book.coverUrl}" alt="${book.title}" onerror="this.onerror=null; this.src='https://placehold.co/600x900/12151c/d2a85e?text=Cover+Unavailable';" class="w-full rounded-xl shadow-md">
-                    <div class="overflow-hidden">
-                        <span class="text-[10px] text-gold font-semibold uppercase tracking-wider block truncate w-full">${book.genre}</span>
-                        <h4 class="font-serif font-bold text-sm text-white truncate mt-0.5">${book.title}</h4>
-                    </div>
-                </div>
-            `).join('');
+            grid.innerHTML = filtered.map(book => generateBookCardHTML(book)).join('');
         }
 
         function toggleFireflies(el) {
