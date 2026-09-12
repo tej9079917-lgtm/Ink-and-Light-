@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Google Fonts: Playfair Display & Inter -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    
     <script>
         tailwind.config = {
             theme: {
@@ -17,6 +18,7 @@
                     fontFamily: {
                         sans: ['Inter', 'sans-serif'],
                         serif: ['Playfair Display', 'serif'],
+                        mono: ['Courier New', 'monospace']
                     },
                     colors: {
                         parchment: '#f7f3ec',
@@ -28,6 +30,7 @@
             }
         }
     </script>
+    
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #0b0f19; color: #f3f4f6; overflow: hidden; }
         .font-serif { font-family: 'Playfair Display', serif; }
@@ -69,7 +72,6 @@
             user-select: none;
         }
         
-        /* Base Open Spread Dimensions: 1131px wide x 800px high */
         .book { 
             position: absolute; 
             width: 1131px; 
@@ -114,7 +116,6 @@
         .book-card:hover { transform: translateY(-6px); box-shadow: 0 12px 28px rgba(210, 168, 94, 0.3); border-color: #d2a85e; }
         .book-card img { aspect-ratio: 2/3; object-fit: cover; }
         
-        /* Updated Page Navigation Button Styles */
         .nav-btn {
             position: absolute;
             top: 50%;
@@ -137,23 +138,16 @@
         .nav-btn.next:hover {
             background: linear-gradient(to left, rgba(0,0,0,0.4), transparent);
         }
-        .nav-btn i {
-            font-size: 2rem;
-            filter: drop-shadow(0 0 8px rgba(0,0,0,0.8));
-        }
+        .nav-btn i { font-size: 2rem; filter: drop-shadow(0 0 8px rgba(0,0,0,0.8)); }
 
-        /* 3D Transform Container for Pan/Zoom */
         #book-transform-wrap {
-            transition: transform 0.1s ease-out; /* Smooth transitions for mouse wheel */
+            transition: transform 0.1s ease-out;
             will-change: transform;
             position: relative;
             width: 100%;
             height: 100%;
         }
-        /* Disable transition during active drag/pinch for immediate response */
-        .is-dragging #book-transform-wrap {
-            transition: none;
-        }
+        .is-dragging #book-transform-wrap { transition: none; }
 
         /* LIGHT MODE OVERRIDES */
         body.light-theme { background-color: #f3f4f6; color: #111827; }
@@ -169,22 +163,8 @@
         body.light-theme .hover\:bg-white\/10:hover { background-color: rgba(0, 0, 0, 0.1) !important; }
 
         /* 3D CUBE LOGO */
-        .logo-cube-container { 
-            perspective: 400px; 
-            width: 100%; 
-            height: 100%; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            overflow: visible; 
-        }
-        .logo-cube { 
-            width: 16px; 
-            height: 16px; 
-            position: relative; 
-            transform-style: preserve-3d; 
-            animation: spinCube 12s infinite linear; 
-        }
+        .logo-cube-container { perspective: 400px; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; overflow: visible; }
+        .logo-cube { width: 16px; height: 16px; position: relative; transform-style: preserve-3d; animation: spinCube 12s infinite linear; }
         @media (min-width: 768px) {
             .logo-cube { width: 20px; height: 20px; }
             .logo-cube-face { width: 20px !important; height: 20px !important; font-size: 10px !important; }
@@ -195,20 +175,7 @@
             .logo-cube-face.top    { transform: rotateX(90deg) translateZ(10px) !important; }
             .logo-cube-face.bottom { transform: rotateX(-90deg) translateZ(10px) !important; }
         }
-        .logo-cube-face { 
-            position: absolute; 
-            width: 16px; 
-            height: 16px; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            font-size: 8px; 
-            background: rgba(18, 21, 28, 0.95); 
-            border: 1px solid rgba(210, 168, 94, 0.5); 
-            box-shadow: inset 0 0 6px rgba(210, 168, 94, 0.2); 
-            backface-visibility: visible; 
-            color: #d2a85e;
-        }
+        .logo-cube-face { position: absolute; width: 16px; height: 16px; display: flex; align-items: center; justify-content: center; font-size: 8px; background: rgba(18, 21, 28, 0.95); border: 1px solid rgba(210, 168, 94, 0.5); box-shadow: inset 0 0 6px rgba(210, 168, 94, 0.2); backface-visibility: visible; color: #d2a85e; }
         .logo-cube-face.front  { transform: translateZ(8px); }
         .logo-cube-face.back   { transform: rotateY(180deg) translateZ(8px); }
         .logo-cube-face.right  { transform: rotateY(90deg) translateZ(8px); }
@@ -224,22 +191,9 @@
             80%, 95% { transform: rotateX(90deg) rotateY(0deg); }
         }
 
-        /* GOLDEN GLITTER CURSOR */
-        .glitter-particle {
-            position: fixed;
-            pointer-events: none;
-            background-color: #d2a85e;
-            border-radius: 50%;
-            box-shadow: 0 0 8px 2px rgba(210, 168, 94, 0.8);
-            z-index: 99999;
-            animation: glitterAnim 0.8s cubic-bezier(0.25, 1, 0.5, 1) forwards;
-        }
-        @keyframes glitterAnim {
-            0% { opacity: 1; transform: scale(1) translate(0, 0); }
-            100% { opacity: 0; transform: scale(0.1) translate(calc(-20px + 40px * var(--rndX)), calc(20px + 20px * var(--rndY))); }
-        }
+        .glitter-particle { position: fixed; pointer-events: none; background-color: #d2a85e; border-radius: 50%; box-shadow: 0 0 8px 2px rgba(210, 168, 94, 0.8); z-index: 99999; animation: glitterAnim 0.8s cubic-bezier(0.25, 1, 0.5, 1) forwards; }
+        @keyframes glitterAnim { 0% { opacity: 1; transform: scale(1) translate(0, 0); } 100% { opacity: 0; transform: scale(0.1) translate(calc(-20px + 40px * var(--rndX)), calc(20px + 20px * var(--rndY))); } }
 
-        /* RTE Content Styles for WYSIWYG Editor */
         .rte-content ul { list-style-type: disc !important; padding-left: 1.5rem !important; margin-bottom: 1rem !important; }
         .rte-content ol { list-style-type: decimal !important; padding-left: 1.5rem !important; margin-bottom: 1rem !important; }
         .rte-content b, .rte-content strong { font-weight: bold !important; }
@@ -249,6 +203,14 @@
         .rte-content blockquote { border-left: 4px solid #d2a85e !important; padding-left: 1rem !important; margin-left: 0 !important; color: #9ca3af !important; font-style: italic !important; }
         .rte-content img { display: inline-block !important; max-width: 100% !important; height: auto !important; }
         .rte-content p { margin-bottom: 0.75rem !important; }
+        /* Table Styles for Visual Elements */
+        .rte-content table { width: 100%; border-collapse: collapse; margin-bottom: 1rem; background: rgba(255,255,255,0.02); }
+        .rte-content th, .rte-content td { border: 1px solid rgba(255,255,255,0.1); padding: 0.75rem; text-align: left; }
+        .rte-content th { background: rgba(255,255,255,0.05); font-weight: bold; color: #d2a85e; }
+        /* Custom Shapes and Charts Base */
+        .rte-content .shape-box { display: inline-block; padding: 1rem; border: 2px solid #d2a85e; background: rgba(210,168,94,0.1); border-radius: 8px; margin: 0.5rem; text-align: center; }
+        .rte-content hr.fancy-line { border: 0; height: 1px; background-image: linear-gradient(to right, transparent, #d2a85e, transparent); margin: 2rem 0; }
+        
         .rte-content font[size="1"] { font-size: 0.75rem !important; }
         .rte-content font[size="2"] { font-size: 0.875rem !important; }
         .rte-content font[size="3"] { font-size: 1rem !important; }
@@ -257,6 +219,8 @@
         .rte-content font[size="6"] { font-size: 1.5rem !important; }
         .rte-content font[size="7"] { font-size: 2rem !important; }
 
+        /* Toolbar active state */
+        .toolbar-btn.active { background-color: rgba(210, 168, 94, 0.2); color: #d2a85e; }
     </style>
 </head>
 <body class="h-screen w-screen overflow-hidden relative">
@@ -273,12 +237,12 @@
                     <div class="w-8 h-8 md:w-10 md:h-10 rounded-xl bg-gold/5 border border-gold/30 flex items-center justify-center overflow-hidden">
                         <div class="logo-cube-container">
                             <div class="logo-cube">
-                                <div class="logo-cube-face front" title="Feather"><i class="fa-solid fa-feather"></i></div>
-                                <div class="logo-cube-face right" title="Ink Bottle"><i class="fa-solid fa-bottle-droplet"></i></div>
-                                <div class="logo-cube-face left" title="Pen"><i class="fa-solid fa-pen-nib"></i></div>
-                                <div class="logo-cube-face top" title="Hand Writing"><i class="fa-solid fa-hand-holding-pen"></i></div>
-                                <div class="logo-cube-face bottom" title="Book"><i class="fa-solid fa-book"></i></div>
-                                <div class="logo-cube-face back" title="Scroll"><i class="fa-solid fa-scroll"></i></div>
+                                <div class="logo-cube-face front"><i class="fa-solid fa-feather"></i></div>
+                                <div class="logo-cube-face right"><i class="fa-solid fa-bottle-droplet"></i></div>
+                                <div class="logo-cube-face left"><i class="fa-solid fa-pen-nib"></i></div>
+                                <div class="logo-cube-face top"><i class="fa-solid fa-hand-holding-pen"></i></div>
+                                <div class="logo-cube-face bottom"><i class="fa-solid fa-book"></i></div>
+                                <div class="logo-cube-face back"><i class="fa-solid fa-scroll"></i></div>
                             </div>
                         </div>
                     </div>
@@ -288,8 +252,6 @@
                     </div>
                 </div>
             </div>
-
-            <!-- Header Actions -->
             <div class="flex items-center space-x-2 md:space-x-4">
                 <button onclick="openPublishModal()" class="flex items-center space-x-1 md:space-x-2 px-3 py-1.5 md:px-4 md:py-2 rounded-lg bg-gold text-black font-semibold hover:bg-darkgold transition text-[10px] md:text-xs shadow-lg shadow-gold/10">
                     <i class="fa-solid fa-plus"></i>
@@ -303,26 +265,21 @@
         </header>
 
         <div class="flex flex-1 overflow-hidden relative w-full">
-            <!-- Mobile Sidebar Overlay -->
             <div id="sidebar-overlay" onclick="toggleSidebar()" class="absolute inset-0 bg-black/60 backdrop-blur-sm z-30 hidden md:hidden"></div>
 
-            <!-- SIDEBAR NAVIGATION -->
             <nav id="sidebar" class="absolute md:relative z-40 h-full w-64 border-r border-white/10 bg-black/95 md:bg-black/20 backdrop-blur-md flex flex-col justify-between p-4 transition-transform duration-300 transform -translate-x-full md:translate-x-0 overflow-y-auto">
                 <div class="space-y-6">
                     <div>
                         <p class="text-[10px] uppercase font-semibold text-gray-500 tracking-wider px-3 mb-2">Navigation</p>
                         <div class="space-y-1">
                             <button onclick="switchView('view-home')" class="sidebar-btn w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl bg-gold/10 text-gold text-sm font-medium transition">
-                                <i class="fa-solid fa-house w-5"></i>
-                                <span>Home Library</span>
+                                <i class="fa-solid fa-house w-5"></i><span>Home Library</span>
                             </button>
                             <button onclick="switchView('view-library')" class="sidebar-btn w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-gray-400 hover:text-white hover:bg-white/5 text-sm font-medium transition">
-                                <i class="fa-solid fa-book-bookmark w-5"></i>
-                                <span>Browse Books</span>
+                                <i class="fa-solid fa-book-bookmark w-5"></i><span>Browse Books</span>
                             </button>
                             <button onclick="switchView('view-bookmarks')" class="sidebar-btn w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-gray-400 hover:text-white hover:bg-white/5 text-sm font-medium transition">
-                                <i class="fa-solid fa-bookmark w-5"></i>
-                                <span>Bookmarks</span>
+                                <i class="fa-solid fa-bookmark w-5"></i><span>Bookmarks</span>
                             </button>
                         </div>
                     </div>
@@ -337,15 +294,12 @@
                             <button onclick="filterCategory('Manga')" class="w-full text-left px-3 py-1.5 rounded-lg hover:bg-white/5 transition">Manga & Comics</button>
                             <button onclick="filterCategory('Mystery')" class="w-full text-left px-3 py-1.5 rounded-lg hover:bg-white/5 transition">Mystery</button>
                             <button onclick="filterCategory('Romance')" class="w-full text-left px-3 py-1.5 rounded-lg hover:bg-white/5 transition">Romance & Drama</button>
-                            <button onclick="filterCategory('Sci-Fi')" class="w-full text-left px-3 py-1.5 rounded-lg hover:bg-white/5 transition">Sci-Fi</button>
-                            <button onclick="filterCategory('Slice of Life')" class="w-full text-left px-3 py-1.5 rounded-lg hover:bg-white/5 transition">Slice of Life</button>
                         </div>
                     </div>
 
                     <div class="pt-2 mt-2 border-t border-white/10 shrink-0">
                         <button onclick="switchView('view-settings')" class="sidebar-btn w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-gray-400 hover:text-white hover:bg-white/5 text-sm font-medium transition">
-                            <i class="fa-solid fa-gear w-5"></i>
-                            <span>Settings</span>
+                            <i class="fa-solid fa-gear w-5"></i><span>Settings</span>
                         </button>
                     </div>
                 </div>
@@ -356,7 +310,6 @@
 
                 <!-- 1. HOME VIEW -->
                 <div id="view-home" class="view-panel absolute inset-0 overflow-y-auto p-4 md:p-8 flex flex-col space-y-6 md:space-y-8 pb-20">
-                    <!-- Hero Banner -->
                     <div class="relative rounded-3xl bg-gradient-to-r from-neutral-900 via-stone-900 to-zinc-900 border border-gold/20 p-6 md:p-12 overflow-hidden shadow-2xl shrink-0 min-h-fit">
                         <div class="absolute right-0 top-0 w-1/3 h-full opacity-10 bg-[radial-gradient(#d2a85e_1px,transparent_1px)] [background-size:16px_16px]"></div>
                         <div class="relative z-10 max-w-2xl space-y-4 md:space-y-5">
@@ -365,8 +318,7 @@
                             <p class="text-gray-400 text-xs md:text-base leading-relaxed">Enjoy immersive 3D page-turns on desktop and seamless vertical scrolling on mobile. Dive into your favorite manga and novels effortlessly.</p>
                             <div class="pt-3 flex flex-col sm:flex-row sm:items-center space-y-3 sm:space-y-0 sm:space-x-4">
                                 <button onclick="switchView('view-library')" class="w-full sm:w-auto px-6 py-3 rounded-xl bg-gold text-black font-semibold hover:bg-darkgold transition shadow-lg shadow-gold/20 flex items-center justify-center space-x-2">
-                                    <i class="fa-solid fa-book-open"></i>
-                                    <span>Explore Library</span>
+                                    <i class="fa-solid fa-book-open"></i><span>Explore Library</span>
                                 </button>
                                 <button onclick="openPublishModal()" class="w-full sm:w-auto px-6 py-3 rounded-xl bg-white/5 border border-white/10 text-white font-medium hover:bg-white/10 transition text-center">
                                     Publish Your Book
@@ -375,7 +327,6 @@
                         </div>
                     </div>
 
-                    <!-- Catalog Header -->
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         <div>
                             <h3 class="font-serif text-xl md:text-2xl font-bold text-white">Featured Books & Manga</h3>
@@ -386,10 +337,7 @@
                         </div>
                     </div>
 
-                    <!-- Books Grid -->
-                    <div id="books-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6">
-                        <!-- Populated dynamically -->
-                    </div>
+                    <div id="books-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6"></div>
                 </div>
 
                 <!-- 2. BROWSE CATALOG VIEW -->
@@ -400,122 +348,58 @@
                             <p class="text-xs text-gray-400">All community-published books and uploaded manga.</p>
                         </div>
                     </div>
-                    <div id="full-books-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6 pb-12">
-                        <!-- Populated dynamically -->
-                    </div>
+                    <div id="full-books-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6 pb-12"></div>
                 </div>
 
                 <!-- 3. BOOKMARKS VIEW -->
                 <div id="view-bookmarks" class="view-panel absolute inset-0 overflow-y-auto p-4 md:p-8 hidden flex-col space-y-4 md:space-y-6">
                     <h3 class="font-serif text-xl md:text-2xl font-bold text-white">Your Bookmarks</h3>
-                    <div id="bookmarks-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6">
-                        <!-- Populated dynamically -->
-                    </div>
+                    <div id="bookmarks-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6"></div>
                 </div>
 
                 <!-- 4. SETTINGS VIEW -->
                 <div id="view-settings" class="view-panel absolute inset-0 overflow-y-auto p-4 md:p-8 hidden flex-col space-y-4 md:space-y-6 max-w-2xl">
                     <h3 class="font-serif text-xl md:text-2xl font-bold text-white">Settings</h3>
-                    
-                    <!-- Account & Authentication -->
                     <div class="space-y-4 bg-black/30 border border-white/10 rounded-2xl p-6">
                         <h4 class="font-semibold text-sm text-white border-b border-white/10 pb-3 mb-3">Account</h4>
-                        <div id="settings-auth-container">
-                            <!-- Populated by JS -->
-                        </div>
+                        <div id="settings-auth-container"></div>
                     </div>
-
-                    <!-- Appearance -->
                     <div class="space-y-4 bg-black/30 border border-white/10 rounded-2xl p-6">
                         <h4 class="font-semibold text-sm text-white border-b border-white/10 pb-3 mb-3">Appearance</h4>
-                        
                         <div class="flex items-center justify-between">
-                            <div>
-                                <h4 class="font-medium text-sm text-white">App Theme</h4>
-                                <p class="text-xs text-gray-400">Switch between Light and Dark mode.</p>
-                            </div>
+                            <div><h4 class="font-medium text-sm text-white">App Theme</h4></div>
                             <div class="flex bg-black/50 border border-white/10 rounded-lg p-1">
                                 <button onclick="setTheme('dark')" id="theme-btn-dark" class="px-3 py-1.5 rounded-md bg-white/10 text-xs text-white transition">Dark</button>
                                 <button onclick="setTheme('light')" id="theme-btn-light" class="px-3 py-1.5 rounded-md text-xs text-gray-400 hover:text-white transition">Light</button>
                             </div>
                         </div>
-
-                        <div class="flex items-center justify-between mt-4">
-                            <div>
-                                <h4 class="font-medium text-sm text-white">Ambient Firefly Particles</h4>
-                                <p class="text-xs text-gray-400">Toggle floating background lights in the reader.</p>
-                            </div>
-                            <input type="checkbox" id="setting-fireflies" checked onchange="toggleFireflies(this)" class="w-4 h-4 accent-gold cursor-pointer">
-                        </div>
-
-                        <div class="flex items-center justify-between mt-4">
-                            <div>
-                                <h4 class="font-medium text-sm text-white">Golden Cursor Glitter</h4>
-                                <p class="text-xs text-gray-400">Customize the magical golden trail following your cursor.</p>
-                            </div>
-                            <select id="setting-glitter" onchange="updateGlitter(this.value)" class="bg-black/50 border border-white/10 rounded-lg px-2 py-1.5 text-xs text-white focus:outline-none focus:border-gold cursor-pointer">
-                                <option value="none">Off</option>
-                                <option value="light" selected>Light</option>
-                                <option value="heavy">Heavy</option>
-                            </select>
-                        </div>
                     </div>
                 </div>
 
-                <!-- 5. READER VIEW (Responsive: 3D on Desktop, Scroll on Mobile) -->
+                <!-- 5. READER VIEW (Responsive) -->
                 <div id="view-reader" class="view-panel absolute inset-0 hidden flex flex-col bg-black/95 z-30">
-                    <!-- Reader Top Navigation Bar -->
                     <div class="h-14 border-b border-white/10 bg-black/80 backdrop-blur-md flex items-center justify-between px-6 z-20">
                         <button onclick="closeReader()" class="flex items-center space-x-2 text-gray-400 hover:text-white transition text-xs font-medium">
-                            <i class="fa-solid fa-arrow-left"></i>
-                            <span class="hidden md:inline">Back to Library</span>
+                            <i class="fa-solid fa-arrow-left"></i><span class="hidden md:inline">Back to Library</span>
                         </button>
                         <div class="text-center truncate px-2">
                             <h3 id="reader-book-title" class="font-serif font-bold text-sm text-white truncate max-w-[150px] md:max-w-md">Book Title</h3>
                             <span id="reader-page-indicator" class="text-[10px] text-gold tracking-widest uppercase">Spread 1 of 1</span>
                         </div>
                         <div class="flex items-center space-x-3">
-                            <button onclick="resetZoomPan()" class="hidden md:flex w-8 h-8 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 text-xs text-gray-300 transition items-center justify-center" title="Reset View">
-                                <i class="fa-solid fa-compress"></i>
-                            </button>
-                            <button onclick="toggleFullscreen()" id="fullscreen-btn" class="px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 text-xs text-gray-300 transition flex items-center space-x-1.5">
-                                <i class="fa-solid fa-expand"></i> <span class="hidden md:inline">Full Screen</span>
-                            </button>
-                            <button onclick="toggleBookmarkCurrent()" id="bookmark-btn" class="w-8 h-8 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 text-xs text-gray-300 transition flex items-center justify-center">
-                                <i class="fa-regular fa-bookmark"></i>
-                            </button>
+                            <button onclick="resetZoomPan()" class="hidden md:flex w-8 h-8 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 text-xs text-gray-300 transition items-center justify-center" title="Reset View"><i class="fa-solid fa-compress"></i></button>
+                            <button onclick="toggleFullscreen()" id="fullscreen-btn" class="px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 text-xs text-gray-300 transition flex items-center space-x-1.5"><i class="fa-solid fa-expand"></i> <span class="hidden md:inline">Full Screen</span></button>
+                            <button onclick="toggleBookmarkCurrent()" id="bookmark-btn" class="w-8 h-8 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 text-xs text-gray-300 transition flex items-center justify-center"><i class="fa-regular fa-bookmark"></i></button>
                         </div>
                     </div>
-
-                    <!-- Reader Interactive Canvas / Container -->
                     <div class="flex-1 relative overflow-hidden flex w-full h-full" id="reader-container-wrap">
-                        
-                        <!-- Left Navigation Button (Desktop Only) -->
-                        <button onclick="prevPage()" class="nav-btn left-0 hidden md:flex" title="Previous Page">
-                            <i class="fa-solid fa-chevron-left"></i>
-                        </button>
-
-                        <!-- DESKTOP: 3D Book View -->
+                        <button onclick="prevPage()" class="nav-btn left-0 hidden md:flex"><i class="fa-solid fa-chevron-left"></i></button>
                         <div id="desktop-3d-view" class="book-section hidden md:flex flex-1 relative overflow-hidden" style="touch-action: none; cursor: grab;">
-                            <div id="book-transform-wrap">
-                                <!-- 3D Book Container -->
-                                <div id="book" class="book">
-                                    <!-- Pages are dynamically generated here -->
-                                </div>
-                            </div>
+                            <div id="book-transform-wrap"><div id="book" class="book"></div></div>
                         </div>
-
-                        <!-- MOBILE: Vertical Scroll View -->
-                        <div id="mobile-scroll-view" class="flex-1 w-full h-full overflow-y-auto flex flex-col md:hidden p-4 space-y-6 pb-24 items-center scroll-smooth">
-                            <!-- Pages will be dynamically populated here -->
-                        </div>
-
-                        <!-- Right Navigation Button (Desktop Only) -->
-                        <button onclick="nextPage()" class="nav-btn right-0 next hidden md:flex" title="Next Page">
-                            <i class="fa-solid fa-chevron-right"></i>
-                        </button>
+                        <div id="mobile-scroll-view" class="flex-1 w-full h-full overflow-y-auto flex flex-col md:hidden p-4 space-y-6 pb-24 items-center scroll-smooth"></div>
+                        <button onclick="nextPage()" class="nav-btn right-0 next hidden md:flex"><i class="fa-solid fa-chevron-right"></i></button>
                     </div>
-
                 </div>
 
             </main>
@@ -530,140 +414,178 @@
                 <button onclick="closePublishModal()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
             <div class="p-6 overflow-y-auto space-y-5 flex-1 custom-scrollbar">
-                
-                <!-- Book Information Fields -->
                 <div class="space-y-4 bg-white/5 p-4 rounded-2xl border border-white/10">
                     <h4 class="text-[10px] font-bold text-gold uppercase tracking-wider">Book Information</h4>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-xs font-medium text-gray-400 mb-1">Book Title *</label>
-                            <input type="text" id="pub-title" placeholder="e.g. Mister Romeo" class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-gold">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-medium text-gray-400 mb-1">Subtitle</label>
-                            <input type="text" id="pub-subtitle" placeholder="e.g. Special Edition (Optional)" class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-gold">
-                        </div>
+                        <div><label class="block text-xs font-medium text-gray-400 mb-1">Book Title *</label><input type="text" id="pub-title" class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:border-gold"></div>
+                        <div><label class="block text-xs font-medium text-gray-400 mb-1">Subtitle</label><input type="text" id="pub-subtitle" class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:border-gold"></div>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-xs font-medium text-gray-400 mb-1">Author Name *</label>
-                            <input type="text" id="pub-author" placeholder="Real name or pen name" class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-gold">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-medium text-gray-400 mb-1">Keywords</label>
-                            <input type="text" id="pub-keywords" placeholder="e.g. romance, fantasy" class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-gold">
-                        </div>
+                        <div><label class="block text-xs font-medium text-gray-400 mb-1">Author Name *</label><input type="text" id="pub-author" class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:border-gold"></div>
+                        <div><label class="block text-xs font-medium text-gray-400 mb-1">Keywords</label><input type="text" id="pub-keywords" class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:border-gold"></div>
                     </div>
-                    <div>
-                        <label class="block text-xs font-medium text-gray-400 mb-1">Book Description</label>
-                        <textarea id="pub-desc" rows="2" placeholder="A short summary or blurb to attract readers..." class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-gold resize-y"></textarea>
-                    </div>
-                    <div>
-                        <label class="flex items-center space-x-2 cursor-pointer mt-1">
-                            <input type="checkbox" id="pub-copyright" checked class="w-4 h-4 accent-gold cursor-pointer rounded border-white/20">
-                            <span class="text-xs text-gray-400 hover:text-white transition">Auto-generate standard Copyright Page (Page 2)</span>
-                        </label>
-                    </div>
+                    <div><label class="block text-xs font-medium text-gray-400 mb-1">Book Description</label><textarea id="pub-desc" rows="2" class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:border-gold resize-y"></textarea></div>
+                    <div><label class="flex items-center space-x-2 cursor-pointer mt-1"><input type="checkbox" id="pub-copyright" checked class="w-4 h-4 accent-gold cursor-pointer"><span class="text-xs text-gray-400">Auto-generate standard Copyright Page</span></label></div>
                 </div>
-
                 <div class="grid grid-cols-1 gap-4">
                     <div>
-                        <label class="block text-xs font-medium text-gray-400 mb-2">Genres (Select multiple)</label>
+                        <label class="block text-xs font-medium text-gray-400 mb-2">Genres</label>
                         <div id="pub-genres-container" class="flex flex-wrap gap-2">
-                            <button type="button" class="genre-pill px-3 py-1 rounded-full border border-white/20 text-xs text-gray-400 hover:text-white hover:border-white/50 transition" onclick="toggleGenre(this)">Action</button>
-                            <button type="button" class="genre-pill px-3 py-1 rounded-full border border-white/20 text-xs text-gray-400 hover:text-white hover:border-white/50 transition" onclick="toggleGenre(this)">Fantasy</button>
-                            <button type="button" class="genre-pill px-3 py-1 rounded-full border border-white/20 text-xs text-gray-400 hover:text-white hover:border-white/50 transition" onclick="toggleGenre(this)">Horror</button>
-                            <button type="button" class="genre-pill px-3 py-1 rounded-full border border-white/20 text-xs text-gray-400 hover:text-white hover:border-white/50 transition" onclick="toggleGenre(this)">Manga</button>
-                            <button type="button" class="genre-pill px-3 py-1 rounded-full border border-white/20 text-xs text-gray-400 hover:text-white hover:border-white/50 transition" onclick="toggleGenre(this)">Mystery</button>
-                            <button type="button" class="genre-pill px-3 py-1 rounded-full border border-white/20 text-xs text-gray-400 hover:text-white hover:border-white/50 transition" onclick="toggleGenre(this)">Romance</button>
-                            <button type="button" class="genre-pill px-3 py-1 rounded-full border border-white/20 text-xs text-gray-400 hover:text-white hover:border-white/50 transition" onclick="toggleGenre(this)">Sci-Fi</button>
-                            <button type="button" class="genre-pill px-3 py-1 rounded-full border border-white/20 text-xs text-gray-400 hover:text-white hover:border-white/50 transition" onclick="toggleGenre(this)">Slice of Life</button>
+                            <button type="button" class="genre-pill px-3 py-1 rounded-full border border-white/20 text-xs text-gray-400" onclick="toggleGenre(this)">Action</button>
+                            <button type="button" class="genre-pill px-3 py-1 rounded-full border border-white/20 text-xs text-gray-400" onclick="toggleGenre(this)">Fantasy</button>
+                            <button type="button" class="genre-pill px-3 py-1 rounded-full border border-white/20 text-xs text-gray-400" onclick="toggleGenre(this)">Romance</button>
                         </div>
                     </div>
-                    <div>
-                        <label class="block text-xs font-medium text-gray-400 mb-1">Cover Image URL</label>
-                        <input type="text" id="pub-cover" placeholder="https://..." class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-gold">
-                    </div>
+                    <div><label class="block text-xs font-medium text-gray-400 mb-1">Cover Image URL</label><input type="text" id="pub-cover" class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:border-gold"></div>
                 </div>
                 <div>
-                    <label class="block text-xs font-medium text-gray-400 mb-2">Book Pages (Add Image URLs or Text)</label>
-                    <div id="pub-pages-container" class="space-y-2 max-h-64 overflow-y-auto pr-2 custom-scrollbar">
-                        <!-- Populated dynamically by createPageRow() -->
-                    </div>
-                    <button onclick="addPageInput('')" class="mt-3 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-xs text-gold hover:bg-white/10 transition flex items-center space-x-2">
-                        <i class="fa-solid fa-plus"></i>
-                        <span>Add Another Page</span>
-                    </button>
+                    <label class="block text-xs font-medium text-gray-400 mb-2">Book Pages</label>
+                    <div id="pub-pages-container" class="space-y-2 max-h-64 overflow-y-auto pr-2 custom-scrollbar"></div>
+                    <button onclick="addPageInput('')" class="mt-3 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-xs text-gold hover:bg-white/10 transition flex items-center space-x-2"><i class="fa-solid fa-plus"></i><span>Add Another Page</span></button>
                 </div>
             </div>
             <div class="p-6 border-t border-white/10 flex items-center justify-end space-x-3 bg-black/30">
-                <button onclick="closePublishModal()" class="px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-xs text-gray-300 hover:bg-white/10">Cancel</button>
-                <button onclick="submitBook()" class="px-6 py-2 rounded-xl bg-gold text-black text-xs font-semibold hover:bg-darkgold shadow-lg shadow-gold/20">Publish Now</button>
+                <button onclick="closePublishModal()" class="px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-xs text-gray-300">Cancel</button>
+                <button onclick="submitBook()" class="px-6 py-2 rounded-xl bg-gold text-black text-xs font-semibold hover:bg-darkgold">Publish Now</button>
             </div>
         </div>
     </div>
 
-    <!-- A4 WYSIWYG EDITOR MODAL -->
+    <!-- EXPANDED A4 WYSIWYG EDITOR MODAL -->
     <div id="a4-editor-modal" class="fixed inset-0 bg-black/95 backdrop-blur-sm z-[60] hidden flex-col">
-        <!-- Toolbar -->
-        <div class="h-16 bg-neutral-900 border-b border-white/10 flex items-center justify-between px-4 z-10 shrink-0">
-            <div class="flex items-center space-x-1 overflow-x-auto custom-scrollbar pb-1">
-                <button type="button" onclick="formatText('bold')" class="w-8 h-8 rounded hover:bg-white/10 flex items-center justify-center text-gray-300 hover:text-white transition" title="Bold"><i class="fa-solid fa-bold"></i></button>
-                <button type="button" onclick="formatText('italic')" class="w-8 h-8 rounded hover:bg-white/10 flex items-center justify-center text-gray-300 hover:text-white transition" title="Italic"><i class="fa-solid fa-italic"></i></button>
-                <button type="button" onclick="formatText('underline')" class="w-8 h-8 rounded hover:bg-white/10 flex items-center justify-center text-gray-300 hover:text-white transition" title="Underline"><i class="fa-solid fa-underline"></i></button>
-                <div class="w-px h-6 bg-white/10 mx-1"></div>
-                <button type="button" onclick="formatText('justifyLeft')" class="w-8 h-8 rounded hover:bg-white/10 flex items-center justify-center text-gray-300 hover:text-white transition" title="Align Left"><i class="fa-solid fa-align-left"></i></button>
-                <button type="button" onclick="formatText('justifyCenter')" class="w-8 h-8 rounded hover:bg-white/10 flex items-center justify-center text-gray-300 hover:text-white transition" title="Align Center"><i class="fa-solid fa-align-center"></i></button>
-                <button type="button" onclick="formatText('justifyRight')" class="w-8 h-8 rounded hover:bg-white/10 flex items-center justify-center text-gray-300 hover:text-white transition" title="Align Right"><i class="fa-solid fa-align-right"></i></button>
-                <div class="w-px h-6 bg-white/10 mx-1"></div>
-                <button type="button" onclick="formatText('insertUnorderedList')" class="w-8 h-8 rounded hover:bg-white/10 flex items-center justify-center text-gray-300 hover:text-white transition" title="Bullet List"><i class="fa-solid fa-list-ul"></i></button>
-                <button type="button" onclick="formatText('insertOrderedList')" class="w-8 h-8 rounded hover:bg-white/10 flex items-center justify-center text-gray-300 hover:text-white transition" title="Numbered List"><i class="fa-solid fa-list-ol"></i></button>
-                <div class="w-px h-6 bg-white/10 mx-1"></div>
-                <select onchange="formatText('fontSize', this.value); this.selectedIndex=2;" class="bg-black/50 border border-white/10 text-gray-300 rounded-lg px-2 py-1 text-xs focus:outline-none focus:border-gold h-8 cursor-pointer">
-                    <option value="1">Size: XS</option>
-                    <option value="2">Size: S</option>
-                    <option value="3" selected>Size: Normal</option>
-                    <option value="4">Size: L</option>
-                    <option value="5">Size: XL</option>
-                    <option value="6">Size: XXL</option>
-                </select>
-                <div class="w-px h-6 bg-white/10 mx-1"></div>
-                <button type="button" onclick="addEditorImage()" class="w-8 h-8 rounded hover:bg-white/10 flex items-center justify-center text-gold hover:text-white transition" title="Insert Image"><i class="fa-regular fa-image"></i></button>
+        <!-- Robust Toolbar -->
+        <div class="bg-neutral-900 border-b border-white/10 flex flex-col px-4 py-2 z-10 shrink-0 shadow-lg">
+            
+            <!-- Toolbar Row 1: Actions & Layout -->
+            <div class="flex items-center justify-between pb-2 border-b border-white/5 mb-2">
+                <div class="flex items-center space-x-3 overflow-x-auto">
+                    <!-- History & Search -->
+                    <div class="flex items-center bg-black/40 rounded-lg p-1 border border-white/5">
+                        <button type="button" onclick="document.execCommand('undo')" class="w-7 h-7 rounded hover:bg-white/10 text-gray-400 hover:text-white transition" title="Undo"><i class="fa-solid fa-rotate-left text-xs"></i></button>
+                        <button type="button" onclick="document.execCommand('redo')" class="w-7 h-7 rounded hover:bg-white/10 text-gray-400 hover:text-white transition" title="Redo"><i class="fa-solid fa-rotate-right text-xs"></i></button>
+                        <div class="w-px h-4 bg-white/10 mx-1"></div>
+                        <button type="button" onclick="toggleSearchReplace()" class="w-7 h-7 rounded hover:bg-white/10 text-gray-400 hover:text-white transition" title="Find & Replace"><i class="fa-solid fa-magnifying-glass text-xs"></i></button>
+                    </div>
+
+                    <!-- Layout & Templates -->
+                    <div class="flex items-center space-x-2">
+                        <select onchange="updatePageLayout('margin', this.value)" class="bg-black/50 border border-white/10 text-gray-300 rounded-lg px-2 py-1 text-xs focus:border-gold h-8 cursor-pointer" title="Page Margins">
+                            <option value="1rem">Margin: Narrow</option>
+                            <option value="2rem" selected>Margin: Normal</option>
+                            <option value="4rem">Margin: Wide</option>
+                        </select>
+                        <select onchange="updatePageLayout('lineHeight', this.value)" class="bg-black/50 border border-white/10 text-gray-300 rounded-lg px-2 py-1 text-xs focus:border-gold h-8 cursor-pointer" title="Line Spacing">
+                            <option value="1.2">Spacing: 1.2</option>
+                            <option value="1.5" selected>Spacing: 1.5</option>
+                            <option value="2.0">Spacing: 2.0</option>
+                        </select>
+                        <select onchange="applyTemplate(this.value); this.selectedIndex=0;" class="bg-black/50 border border-white/10 text-gold rounded-lg px-2 py-1 text-xs focus:border-gold h-8 cursor-pointer font-semibold" title="Insert Template">
+                            <option value="" disabled selected>+ Add Template</option>
+                            <option value="title">Chapter Title</option>
+                            <option value="quote">Pull Quote</option>
+                            <option value="pageNum">Page Num Marker</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="flex items-center space-x-3 shrink-0 ml-4">
+                    <button onclick="closeA4Editor()" class="px-4 py-1.5 rounded-xl bg-white/5 border border-white/10 text-xs text-gray-300 hover:bg-white/10 transition">Cancel</button>
+                    <button onclick="saveA4Editor()" class="px-4 py-1.5 rounded-xl bg-gold text-black text-xs font-semibold hover:bg-darkgold shadow-lg shadow-gold/20 transition"><i class="fa-solid fa-check mr-1"></i> Save</button>
+                </div>
             </div>
-            <div class="flex items-center space-x-3 shrink-0 ml-4">
-                <button onclick="closeA4Editor()" class="px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-xs text-gray-300 hover:bg-white/10 transition">Cancel</button>
-                <button onclick="saveA4Editor()" class="px-4 py-2 rounded-xl bg-gold text-black text-xs font-semibold hover:bg-darkgold shadow-lg shadow-gold/20 transition">Save Page</button>
+
+            <!-- Toolbar Row 2: Formatting & Insert Elements -->
+            <div class="flex items-center space-x-1 overflow-x-auto pb-1">
+                <!-- Typography -->
+                <select onchange="formatText('fontName', this.value)" class="bg-black/50 border border-white/10 text-gray-300 rounded-lg px-2 py-1 text-xs focus:border-gold h-8 cursor-pointer" title="Font Style">
+                    <option value="'Playfair Display', serif" selected>Playfair (Serif)</option>
+                    <option value="'Inter', sans-serif">Inter (Sans)</option>
+                    <option value="'Courier New', monospace">Courier (Mono)</option>
+                </select>
+                <select onchange="formatText('fontSize', this.value); this.selectedIndex=2;" class="bg-black/50 border border-white/10 text-gray-300 rounded-lg px-2 py-1 text-xs focus:border-gold h-8 cursor-pointer" title="Font Size">
+                    <option value="1">Size: XS</option><option value="2">Size: S</option><option value="3" selected>Size: Normal</option>
+                    <option value="4">Size: L</option><option value="5">Size: XL</option><option value="6">Size: XXL</option>
+                </select>
+                
+                <div class="flex items-center bg-black/40 rounded-lg px-1 py-0.5 border border-white/5 mx-1">
+                    <div class="flex items-center flex-col relative w-6 h-7 justify-center group" title="Text Color">
+                        <i class="fa-solid fa-font text-gray-300 text-[10px]"></i>
+                        <input type="color" onchange="formatText('foreColor', this.value)" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full" value="#e5e7eb">
+                    </div>
+                    <div class="flex items-center flex-col relative w-6 h-7 justify-center group" title="Highlight Color">
+                        <i class="fa-solid fa-highlighter text-gray-300 text-[10px]"></i>
+                        <input type="color" onchange="formatText('hiliteColor', this.value)" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full" value="#d2a85e">
+                    </div>
+                </div>
+
+                <div class="w-px h-5 bg-white/10 mx-1"></div>
+                
+                <!-- Styling -->
+                <button type="button" onclick="formatText('bold')" class="toolbar-btn w-8 h-8 rounded hover:bg-white/10 flex items-center justify-center text-gray-300 transition" title="Bold"><i class="fa-solid fa-bold"></i></button>
+                <button type="button" onclick="formatText('italic')" class="toolbar-btn w-8 h-8 rounded hover:bg-white/10 flex items-center justify-center text-gray-300 transition" title="Italic"><i class="fa-solid fa-italic"></i></button>
+                <button type="button" onclick="formatText('underline')" class="toolbar-btn w-8 h-8 rounded hover:bg-white/10 flex items-center justify-center text-gray-300 transition" title="Underline"><i class="fa-solid fa-underline"></i></button>
+                
+                <div class="w-px h-5 bg-white/10 mx-1"></div>
+                
+                <!-- Alignment & Lists -->
+                <button type="button" onclick="formatText('justifyLeft')" class="w-8 h-8 rounded hover:bg-white/10 flex items-center justify-center text-gray-300 transition" title="Align Left"><i class="fa-solid fa-align-left"></i></button>
+                <button type="button" onclick="formatText('justifyCenter')" class="w-8 h-8 rounded hover:bg-white/10 flex items-center justify-center text-gray-300 transition" title="Align Center"><i class="fa-solid fa-align-center"></i></button>
+                <button type="button" onclick="formatText('justifyRight')" class="w-8 h-8 rounded hover:bg-white/10 flex items-center justify-center text-gray-300 transition" title="Align Right"><i class="fa-solid fa-align-right"></i></button>
+                <button type="button" onclick="formatText('justifyFull')" class="w-8 h-8 rounded hover:bg-white/10 flex items-center justify-center text-gray-300 transition" title="Justify"><i class="fa-solid fa-align-justify"></i></button>
+                <button type="button" onclick="formatText('insertUnorderedList')" class="w-8 h-8 rounded hover:bg-white/10 flex items-center justify-center text-gray-300 transition" title="Bullet List"><i class="fa-solid fa-list-ul"></i></button>
+                <button type="button" onclick="formatText('insertOrderedList')" class="w-8 h-8 rounded hover:bg-white/10 flex items-center justify-center text-gray-300 transition" title="Numbered List"><i class="fa-solid fa-list-ol"></i></button>
+                
+                <div class="w-px h-5 bg-white/10 mx-1"></div>
+                
+                <!-- Visual Elements Insert -->
+                <button type="button" onclick="addEditorImage()" class="w-8 h-8 rounded hover:bg-white/10 flex items-center justify-center text-gold transition" title="Insert Image"><i class="fa-regular fa-image"></i></button>
+                <button type="button" onclick="insertTable()" class="w-8 h-8 rounded hover:bg-white/10 flex items-center justify-center text-gold transition" title="Insert Table"><i class="fa-solid fa-table"></i></button>
+                <div class="relative inline-block text-left">
+                    <button type="button" onclick="document.getElementById('shapes-menu').classList.toggle('hidden')" class="w-8 h-8 rounded hover:bg-white/10 flex items-center justify-center text-gold transition" title="Insert Shapes/Visuals"><i class="fa-solid fa-shapes"></i></button>
+                    <div id="shapes-menu" class="hidden absolute right-0 mt-2 w-32 rounded-md shadow-lg bg-black/90 ring-1 ring-white/10 z-50">
+                        <div class="py-1" role="menu">
+                            <button onclick="insertVisual('line'); document.getElementById('shapes-menu').classList.add('hidden');" class="block px-4 py-2 text-xs text-gray-300 hover:bg-white/10 w-full text-left">Fancy Line (HR)</button>
+                            <button onclick="insertVisual('box'); document.getElementById('shapes-menu').classList.add('hidden');" class="block px-4 py-2 text-xs text-gray-300 hover:bg-white/10 w-full text-left">Content Box</button>
+                            <button onclick="insertVisual('chart'); document.getElementById('shapes-menu').classList.add('hidden');" class="block px-4 py-2 text-xs text-gray-300 hover:bg-white/10 w-full text-left">Basic Chart (Table)</button>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
+
+        <!-- Find & Replace Floating Panel -->
+        <div id="search-replace-panel" class="hidden absolute top-24 right-8 bg-neutral-900 border border-white/20 p-4 rounded-xl shadow-2xl z-20 w-64">
+            <div class="flex justify-between items-center mb-3">
+                <h4 class="text-xs font-bold text-gold uppercase tracking-wider">Find & Replace</h4>
+                <button onclick="toggleSearchReplace()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <input type="text" id="sr-find" placeholder="Find word..." class="w-full bg-black/50 border border-white/10 rounded-lg px-3 py-1.5 text-xs text-white mb-2 focus:border-gold">
+            <input type="text" id="sr-replace" placeholder="Replace with..." class="w-full bg-black/50 border border-white/10 rounded-lg px-3 py-1.5 text-xs text-white mb-3 focus:border-gold">
+            <div class="flex space-x-2">
+                <button onclick="findNextText()" class="flex-1 bg-white/10 hover:bg-white/20 text-white text-xs py-1.5 rounded-lg transition">Find Next</button>
+                <button onclick="replaceText()" class="flex-1 bg-gold hover:bg-darkgold text-black font-semibold text-xs py-1.5 rounded-lg transition">Replace</button>
+            </div>
+        </div>
+
         <!-- Editor Canvas Area -->
-        <div class="flex-1 overflow-y-auto p-4 md:p-8 flex justify-center bg-[#05070a] custom-scrollbar">
-            <!-- Canvas exactly matching reader style -->
-            <div id="a4-canvas" contenteditable="true" class="bg-[#12151c] text-gray-200 w-full max-w-[800px] aspect-[1/1.414] shadow-2xl p-8 outline-none font-serif overflow-y-auto text-sm leading-relaxed border border-white/5 rte-content custom-scrollbar" style="min-height: 800px;">
+        <div class="flex-1 overflow-y-auto p-4 md:p-8 flex justify-center bg-[#05070a] custom-scrollbar relative">
+            <div id="a4-canvas" contenteditable="true" spellcheck="true" class="bg-[#12151c] text-gray-200 w-full max-w-[800px] aspect-[1/1.414] shadow-2xl p-8 outline-none font-serif overflow-y-auto text-sm leading-relaxed border border-white/5 rte-content custom-scrollbar transition-all" style="min-height: 800px; line-height: 1.5; padding: 2rem;">
             </div>
         </div>
     </div>
 
-    <!-- GOOGLE DOC SYNC MODAL -->
-    <div id="sync-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-neutral-900 border border-white/10 rounded-3xl w-full max-w-md overflow-hidden shadow-2xl flex flex-col">
-            <div class="p-6 border-b border-white/10 flex items-center justify-between">
-                <h3 class="font-serif font-bold text-lg text-white">Import Google Doc</h3>
-                <button onclick="closeSyncModal()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+    <!-- CUSTOM ALERT / CONFIRM MODALS -->
+    <div id="custom-msg-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] hidden flex items-center justify-center p-4">
+        <div class="bg-neutral-900 border border-white/10 rounded-2xl w-full max-w-sm overflow-hidden shadow-2xl flex flex-col transform scale-95 transition-transform duration-200" id="custom-msg-content">
+            <div class="p-5 border-b border-white/10 flex items-center space-x-3">
+                <i id="msg-icon" class="fa-solid fa-circle-info text-gold text-lg"></i>
+                <h3 id="msg-title" class="font-serif font-bold text-base text-white">Notice</h3>
             </div>
-            <div class="p-6 space-y-4">
-                <p class="text-xs text-gray-400">Paste your public Google Doc URL to automatically extract and format its contents into an A4 3D book.</p>
-                <div>
-                    <label class="block text-xs font-medium text-gray-400 mb-1">Google Doc URL</label>
-                    <input type="text" id="sync-url" placeholder="https://docs.google.com/document/d/..." class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-gold">
-                </div>
-                <div>
-                    <label class="block text-xs font-medium text-gray-400 mb-1">Book Title</label>
-                    <input type="text" id="sync-title" placeholder="My Imported Novel" class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-gold">
-                </div>
+            <div class="p-5">
+                <p id="msg-text" class="text-sm text-gray-300 leading-relaxed">Message goes here.</p>
             </div>
-            <div class="p-6 border-t border-white/10 flex items-center justify-end space-x-3 bg-black/30">
-                <button onclick="closeSyncModal()" class="px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-xs text-gray-300">Cancel</button>
-                <button onclick="processGoogleDocSync()" class="px-6 py-2 rounded-xl bg-gold text-black text-xs font-semibold hover:bg-darkgold">Import & Read</button>
+            <div class="p-4 border-t border-white/10 flex items-center justify-end space-x-3 bg-black/30" id="msg-actions">
+                <!-- Buttons injected by JS -->
             </div>
         </div>
     </div>
@@ -678,16 +600,10 @@
             <div class="p-6 space-y-4">
                 <div id="auth-name-group" class="hidden">
                     <label class="block text-xs font-medium text-gray-400 mb-1">Full Name</label>
-                    <input type="text" id="auth-name" placeholder="John Doe" class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-gold">
+                    <input type="text" id="auth-name" placeholder="John Doe" class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:border-gold">
                 </div>
-                <div>
-                    <label class="block text-xs font-medium text-gray-400 mb-1">Email Address</label>
-                    <input type="email" id="auth-email" placeholder="reader@example.com" class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-gold">
-                </div>
-                <div>
-                    <label class="block text-xs font-medium text-gray-400 mb-1">Password</label>
-                    <input type="password" id="auth-password" placeholder="••••••••" class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-gold">
-                </div>
+                <div><label class="block text-xs font-medium text-gray-400 mb-1">Email Address</label><input type="email" id="auth-email" placeholder="reader@example.com" class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:border-gold"></div>
+                <div><label class="block text-xs font-medium text-gray-400 mb-1">Password</label><input type="password" id="auth-password" placeholder="••••••••" class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:border-gold"></div>
             </div>
             <div class="p-6 border-t border-white/10 flex items-center justify-between bg-black/30">
                 <button onclick="toggleAuthMode()" id="auth-switch-btn" class="text-xs text-gold hover:underline">Need an account? Register</button>
@@ -697,10 +613,50 @@
     </div>
 
     <script>
-        // Live Google Apps Script API Endpoint
         var API_URL = 'https://script.google.com/macros/s/AKfycbzhRZm0qBCQv7wjvbeuCZBY4sNY_wNFXz0HeLcZLmh9tP0ZJZDxpzdMoYa8l36Yg0j-6A/exec';
 
-        // --- Ambient Firefly Generator ---
+        // --- Custom Alert/Confirm System to avoid native browser dialogs ---
+        let msgResolveCallback = null;
+        function showCustomModal(title, message, isConfirm, iconClass = "fa-solid fa-circle-info", resolve = null) {
+            document.getElementById('msg-title').innerText = title;
+            document.getElementById('msg-text').innerText = message;
+            document.getElementById('msg-icon').className = iconClass + " text-gold text-lg";
+            
+            const actions = document.getElementById('msg-actions');
+            msgResolveCallback = resolve;
+            
+            if (isConfirm) {
+                actions.innerHTML = `
+                    <button onclick="closeCustomModal(false)" class="px-4 py-1.5 rounded-xl bg-white/5 border border-white/10 text-xs text-gray-300 hover:bg-white/10 transition">Cancel</button>
+                    <button onclick="closeCustomModal(true)" class="px-4 py-1.5 rounded-xl bg-gold text-black text-xs font-semibold hover:bg-darkgold transition">Confirm</button>
+                `;
+            } else {
+                actions.innerHTML = `<button onclick="closeCustomModal(true)" class="px-5 py-1.5 rounded-xl bg-gold text-black text-xs font-semibold hover:bg-darkgold transition">OK</button>`;
+            }
+            
+            const modal = document.getElementById('custom-msg-modal');
+            modal.classList.remove('hidden');
+            setTimeout(() => document.getElementById('custom-msg-content').classList.remove('scale-95'), 10);
+        }
+
+        function closeCustomModal(result) {
+            document.getElementById('custom-msg-content').classList.add('scale-95');
+            setTimeout(() => {
+                document.getElementById('custom-msg-modal').classList.add('hidden');
+                if (msgResolveCallback) msgResolveCallback(result);
+            }, 200);
+        }
+
+        function customAlert(message) {
+            showCustomModal("Notice", message, false);
+        }
+
+        function customConfirm(message, onConfirm) {
+            showCustomModal("Confirm Action", message, true, "fa-solid fa-triangle-exclamation", (res) => {
+                if (res && onConfirm) onConfirm();
+            });
+        }
+
         function initFireflies() {
             const container = document.getElementById('forest');
             if (!container) return;
@@ -717,28 +673,19 @@
         }
         initFireflies();
 
-        // --- Library Sample Data & API Integration ---
         var books = [];
 
         async function fetchLiveBooks() {
             try {
                 const response = await fetch(API_URL);
                 const text = await response.text();
-                
                 let result;
-                try {
-                    result = JSON.parse(text);
-                } catch(e) {
-                    console.warn('Backend returned non-JSON. Running in offline mode.');
-                    return;
-                }
+                try { result = JSON.parse(text); } catch(e) { return; }
 
                 if (result.success && Array.isArray(result.data) && result.data.length > 0) {
                     const loadedBooks = result.data.map(item => {
                         let pagesList = [];
-                        if (item['Content']) {
-                            pagesList = item['Content'].toString().split('||PAGE||').map(p => p.trim());
-                        }
+                        if (item['Content']) { pagesList = item['Content'].toString().split('||PAGE||').map(p => p.trim()); }
                         const cover = item['Cover URL'] || 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=600&q=80';
                         return {
                             id: item['Book ID'] || ('bk_' + Math.random()),
@@ -748,37 +695,24 @@
                             pages: pagesList.length > 0 ? [cover, ...pagesList] : [cover, 'No page content available.']
                         };
                     });
-                    
-                    // Prepend live sheet books to current catalog
                     books = [...loadedBooks, ...books];
                     renderHomeCatalog();
                 }
-            } catch (err) {
-                console.warn('Backend API offline or unreachable, running in offline mode:', err);
-            }
+            } catch (err) { console.warn('Backend API offline'); }
         }
         fetchLiveBooks();
 
         var bookmarks = [];
         var currentBook = null;
-        var currentPageIndex = 0; // Spread index on desktop
+        var currentPageIndex = 0; 
         var isPseudoFullscreen = false;
         var editingBookId = null;
 
-        // Zoom and Pan State (Desktop 3D)
         let currentScale = 1;
         let baseFitScale = 1;
-        let currentPanX = 0;
-        let currentPanY = 0;
+        let currentPanX = 0, currentPanY = 0;
         let isDragging = false;
-        let dragStartX = 0;
-        let dragStartY = 0;
-        let initialPanX = 0;
-        let initialPanY = 0;
-        let initialPinchDistance = null;
-        let initialPinchScale = 1;
-
-        // Mobile Intersection Observer state
+        let dragStartX = 0, dragStartY = 0, initialPanX = 0, initialPanY = 0;
         let mobileObserver = null;
 
         function toggleSidebar() {
@@ -799,7 +733,6 @@
             }
         }
 
-        // --- Navigation & View Controller ---
         function switchView(viewId) {
             document.querySelectorAll('.view-panel').forEach(panel => panel.classList.add('hidden'));
             document.getElementById(viewId).classList.remove('hidden');
@@ -813,7 +746,6 @@
                 e.currentTarget.classList.add('bg-gold/10', 'text-gold');
                 e.currentTarget.classList.remove('text-gray-400');
             }
-            
             closeSidebarOnMobile();
         }
 
@@ -849,18 +781,14 @@
                 if (fullGrid) fullGrid.innerHTML = emptyState;
                 return;
             }
-
             const html = books.map(book => generateBookCardHTML(book)).join('');
-
             if (grid) grid.innerHTML = html;
             if (fullGrid) fullGrid.innerHTML = html;
         }
-        renderHomeCatalog();
 
-        // --- Reader Engine (Hybrid 3D / Mobile Scroll) ---
         function openReader(bookId) {
             if (!currentUser) {
-                alert("Please log in to read books.");
+                customAlert("Please log in to read books.");
                 openAuthModal();
                 forceAuthMode('login');
                 return;
@@ -872,35 +800,15 @@
             currentPageIndex = 0;
             document.getElementById('reader-book-title').innerText = currentBook.title;
             switchView('view-reader');
-            
             buildBookDOM();
             updateReaderUI();
             
-            // Allow container layout before sizing transform
-            setTimeout(() => {
-                calculateBaseFit();
-                resetZoomPan();
-            }, 50);
+            setTimeout(() => { calculateBaseFit(); resetZoomPan(); }, 50);
         }
 
         function closeReader() {
-            if (document.fullscreenElement) {
-                document.exitFullscreen();
-            } else if (isPseudoFullscreen) {
-                disablePseudoFullscreen();
-            }
+            if (document.fullscreenElement) { document.exitFullscreen(); } else if (isPseudoFullscreen) { disablePseudoFullscreen(); }
             switchView('view-home');
-        }
-
-        function toggleGenre(btn) {
-            btn.classList.toggle('selected-genre');
-            if (btn.classList.contains('selected-genre')) {
-                btn.classList.add('bg-gold/20', 'text-gold', 'border-gold/50');
-                btn.classList.remove('text-gray-400', 'border-white/20');
-            } else {
-                btn.classList.remove('bg-gold/20', 'text-gold', 'border-gold/50');
-                btn.classList.add('text-gray-400', 'border-white/20');
-            }
         }
 
         function buildBookDOM() {
@@ -908,15 +816,10 @@
             const mobileViewEl = document.getElementById('mobile-scroll-view');
             
             let totalPages = [...currentBook.pages];
-            // Ensure even count for spread layout on desktop
-            if (totalPages.length % 2 !== 0) {
-                totalPages.push("");
-            }
+            if (totalPages.length % 2 !== 0) totalPages.push("");
 
-            // 1. Build Desktop 3D Spread Leaves
             let leavesHTML = '';
             const totalLeaves = Math.ceil(totalPages.length / 2);
-
             for (let i = 0; i < totalLeaves; i++) {
                 let rightContent = totalPages[2 * i] || "";
                 let leftContent = totalPages[(2 * i) + 1] || "";
@@ -924,19 +827,14 @@
             }
             bookEl.innerHTML = leavesHTML;
 
-            // 2. Build Mobile Vertical Scroll View
             let mobileHTML = '';
             let validMobilePageIndex = 0;
             
             currentBook.pages.forEach((pageContent) => {
-                // Filter out empty spaces and explicitly added layout placeholders that disrupt a single scroll view
                 if (!pageContent || pageContent.trim() === '') return;
                 if (pageContent.includes('>[Inside Cover]<') || pageContent.includes('>[Blank]<')) return;
-
-                // For purely text pages allow adaptive height, for images enforce A4 portrait aspect ratio
                 const isImage = pageContent.includes('<img') || /^(https?:\/\/|data:image\/).+/i.test(pageContent.trim());
                 const sizeClass = isImage ? 'aspect-[1/1.414]' : 'min-h-[70vh] md:aspect-[1/1.414]';
-
                 mobileHTML += `
                     <div class="w-full max-w-2xl mx-auto bg-[#12151c] border border-white/5 shadow-2xl relative flex flex-col shrink-0 page-mobile-container rounded-lg overflow-hidden ${sizeClass}" data-mobile-page="${validMobilePageIndex}">
                         ${renderPageContent(pageContent)}
@@ -948,8 +846,6 @@
             
             mobileViewEl.innerHTML = mobileHTML;
             mobileViewEl.scrollTop = 0;
-            
-            // Setup intersection observer to track which page is active on mobile
             setTimeout(setupMobileScrollObserver, 100);
         }
 
@@ -972,313 +868,130 @@
             `;
         }
 
-        // --- Page Content & Link Parser ---
         function renderPageContent(content) {
-            if (!content || !content.trim()) {
-                return '<div class="flex items-center justify-center h-full w-full text-gray-600 italic font-serif text-sm">Blank Page</div>';
-            }
-            
+            if (!content || !content.trim()) return '<div class="flex items-center justify-center h-full w-full text-gray-600 italic font-serif text-sm">Blank Page</div>';
             let trimmed = content.trim();
-
             const imgClass = "w-full h-full object-contain pointer-events-none select-none";
             const containerClass = "w-full h-full relative flex items-center justify-center bg-black/40 overflow-hidden";
-
-            // 1. Direct Image URL or Data URI
             if (/^(https?:\/\/|data:image\/).+/i.test(trimmed) && !trimmed.includes('\n') && !trimmed.includes(' ')) {
-                return `
-                    <div class="${containerClass}">
-                        <img src="${trimmed}" 
-                             alt="Book Page" 
-                             onerror="this.onerror=null; this.src='https://placehold.co/800x1131/12151c/d2a85e?text=Image+Unavailable';" 
-                             class="${imgClass}" 
-                             draggable="false">
-                    </div>`;
+                return `<div class="${containerClass}"><img src="${trimmed}" onerror="this.onerror=null; this.src='https://placehold.co/800x1131/12151c/d2a85e?text=Image+Unavailable';" class="${imgClass}" draggable="false"></div>`;
             }
-
-            // 2. Markdown Image Syntax ![alt](url)
-            const mdImgMatch = trimmed.match(/^!\[.*?\]\((https?:\/\/[^\s)]+)\)$/i);
-            if (mdImgMatch) {
-                return `
-                    <div class="${containerClass}">
-                        <img src="${mdImgMatch[1]}" 
-                             alt="Book Page" 
-                             onerror="this.onerror=null; this.src='https://placehold.co/800x1131/12151c/d2a85e?text=Image+Unavailable';" 
-                             class="${imgClass}" 
-                             draggable="false">
-                    </div>`;
-            }
-
-            // 3. HTML Content Tag (Updated to include rte-content)
             if (/<[a-z][\s\S]*>/i.test(trimmed)) {
                 return `<div class="w-full h-full p-6 overflow-y-auto font-serif text-gray-200 leading-relaxed text-sm rte-content">${trimmed}</div>`;
             }
-
-            // 4. Formatted Plain Text
             return `<div class="w-full h-full p-8 overflow-y-auto font-serif text-gray-200 text-sm md:text-base leading-relaxed whitespace-pre-wrap">${escapeHTML(trimmed)}</div>`;
         }
 
-        function escapeHTML(str) {
-            return str.replace(/[&<>'"]/g, tag => ({
-                '&': '&amp;',
-                '<': '&lt;',
-                '>': '&gt;',
-                "'": '&#39;',
-                '"': '&quot;'
-            }[tag] || tag));
-        }
+        function escapeHTML(str) { return str.replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)); }
 
         function setupMobileScrollObserver() {
             if (mobileObserver) mobileObserver.disconnect();
-            
             const pages = document.querySelectorAll('.page-mobile-container');
             if (!pages.length) return;
-
             mobileObserver = new IntersectionObserver((entries) => {
                 entries.forEach(entry => {
                     if (entry.isIntersecting && window.innerWidth < 768) {
                         const pageIndex = parseInt(entry.target.getAttribute('data-mobile-page'));
                         const totalMobilePages = document.querySelectorAll('.page-mobile-container').length;
                         document.getElementById('reader-page-indicator').innerText = `Page ${pageIndex + 1} of ${totalMobilePages}`;
-                        
-                        // Sync spread index roughly for bookmarking logic
                         currentPageIndex = Math.floor(pageIndex / 2);
                         updateBookmarkButtonState();
                     }
                 });
-            }, { threshold: 0.5 }); // Detects when at least 50% of the page is in view
-
+            }, { threshold: 0.5 });
             pages.forEach(p => mobileObserver.observe(p));
         }
 
         function updateReaderUI() {
-            // Update 3D Book State
             const papers = document.querySelectorAll('.paper');
             const totalLeaves = papers.length;
-
             papers.forEach((paper, idx) => {
                 if (idx < currentPageIndex) {
-                    paper.classList.add('flipped');
-                    paper.style.zIndex = idx + 1; // Flipped left stack order
+                    paper.classList.add('flipped'); paper.style.zIndex = idx + 1;
                 } else {
-                    paper.classList.remove('flipped');
-                    paper.style.zIndex = totalLeaves - idx; // Unflipped right stack order
+                    paper.classList.remove('flipped'); paper.style.zIndex = totalLeaves - idx;
                 }
             });
-
-            // Update Label based on Desktop/Mobile Viewports
-            if (window.innerWidth >= 768) {
-                document.getElementById('reader-page-indicator').innerText = `Spread ${currentPageIndex + 1} of ${totalLeaves}`;
-            }
-            
+            if (window.innerWidth >= 768) document.getElementById('reader-page-indicator').innerText = `Spread ${currentPageIndex + 1} of ${totalLeaves}`;
             updateBookmarkButtonState();
         }
 
-        function nextPage() {
-            if (window.innerWidth < 768) return; // Managed by scroll natively on mobile
-            const papers = document.querySelectorAll('.paper');
-            if (currentPageIndex < papers.length) {
-                currentPageIndex++;
-                updateReaderUI();
-            }
-        }
-
-        function prevPage() {
-            if (window.innerWidth < 768) return;
-            if (currentPageIndex > 0) {
-                currentPageIndex--;
-                updateReaderUI();
-            }
-        }
+        function nextPage() { if (window.innerWidth >= 768 && currentPageIndex < document.querySelectorAll('.paper').length) { currentPageIndex++; updateReaderUI(); } }
+        function prevPage() { if (window.innerWidth >= 768 && currentPageIndex > 0) { currentPageIndex--; updateReaderUI(); } }
 
         function calculateBaseFit() {
             const container = document.getElementById('desktop-3d-view');
             if (!container) return;
-            
-            let containerWidth = container.clientWidth || window.innerWidth;
-            let containerHeight = container.clientHeight || window.innerHeight;
-            
-            // Failsafe if flex height collapses during transition
-            if (containerWidth === 0 || containerHeight === 0) {
-                containerWidth = window.innerWidth;
-                containerHeight = window.innerHeight;
-            }
-            
-            // Base A4 spread proportions fit
-            baseFitScale = Math.min((containerWidth * 0.92) / 1131, (containerHeight * 0.86) / 800) || 0.5;
-            if (baseFitScale < 0.1) baseFitScale = 0.5; // Prevent invisible scaling
+            let cw = container.clientWidth || window.innerWidth;
+            let ch = container.clientHeight || window.innerHeight;
+            if (cw === 0 || ch === 0) { cw = window.innerWidth; ch = window.innerHeight; }
+            baseFitScale = Math.min((cw * 0.92) / 1131, (ch * 0.86) / 800) || 0.5;
+            if (baseFitScale < 0.1) baseFitScale = 0.5;
             currentScale = baseFitScale;
         }
 
         function applyTransform() {
-            const transformWrap = document.getElementById('book-transform-wrap');
-            const bookEl = document.getElementById('book');
-            if (transformWrap && bookEl) {
-                transformWrap.style.transform = `translate(${currentPanX}px, ${currentPanY}px)`;
-                bookEl.style.transform = `scale(${currentScale})`;
-            }
+            const tw = document.getElementById('book-transform-wrap'), be = document.getElementById('book');
+            if (tw && be) { tw.style.transform = `translate(${currentPanX}px, ${currentPanY}px)`; be.style.transform = `scale(${currentScale})`; }
         }
 
-        function resetZoomPan() {
-            calculateBaseFit();
-            currentPanX = 0;
-            currentPanY = 0;
-            applyTransform();
-        }
+        function resetZoomPan() { calculateBaseFit(); currentPanX = 0; currentPanY = 0; applyTransform(); }
 
-        function updateBookTransform() {
-            calculateBaseFit();
-            resetZoomPan();
-            updateReaderUI(); // Re-trigger UI update for mobile/desktop toggle check
-        }
-
-        window.addEventListener('resize', () => {
-            updateBookTransform();
-        });
-
-        // Keyboard navigation (Desktop Only)
+        window.addEventListener('resize', () => { calculateBaseFit(); resetZoomPan(); updateReaderUI(); });
         document.addEventListener('keydown', (e) => {
-            if (document.getElementById('view-reader').classList.contains('hidden')) return;
-            if (window.innerWidth < 768) return; // Disable keyboard spread-flipping on mobile scroll view
-            
-            if (e.target.tagName.toLowerCase() === 'input' || e.target.tagName.toLowerCase() === 'textarea') return;
-
-            if (e.key === 'ArrowRight') {
-                e.preventDefault();
-                nextPage();
-            } else if (e.key === 'ArrowLeft') {
-                e.preventDefault();
-                prevPage();
-            } else if (e.key === '+' || e.key === '=') {
-                currentScale = Math.min(currentScale * 1.1, baseFitScale * 4);
-                applyTransform();
-            } else if (e.key === '-') {
-                currentScale = Math.max(currentScale * 0.9, baseFitScale * 0.5);
-                applyTransform();
-            }
+            if (document.getElementById('view-reader').classList.contains('hidden') || window.innerWidth < 768) return;
+            if (['input','textarea'].includes(e.target.tagName.toLowerCase())) return;
+            if (e.key === 'ArrowRight') { e.preventDefault(); nextPage(); }
+            else if (e.key === 'ArrowLeft') { e.preventDefault(); prevPage(); }
         });
 
         const readerViewContainer = document.getElementById('desktop-3d-view');
-
         readerViewContainer.addEventListener('wheel', (e) => {
             e.preventDefault();
-            const zoomSensitivity = 0.001;
-            const delta = -e.deltaY;
-            
-            let newScale = currentScale * (1 + delta * zoomSensitivity);
-            newScale = Math.max(baseFitScale * 0.5, Math.min(newScale, baseFitScale * 5));
-            currentScale = newScale;
+            let newScale = currentScale * (1 + (-e.deltaY) * 0.001);
+            currentScale = Math.max(baseFitScale * 0.5, Math.min(newScale, baseFitScale * 5));
             applyTransform();
         }, { passive: false });
-
         readerViewContainer.addEventListener('mousedown', (e) => {
             if (e.button !== 0) return;
-            isDragging = true;
-            readerViewContainer.classList.add('is-dragging');
-            readerViewContainer.style.cursor = 'grabbing';
-            dragStartX = e.clientX;
-            dragStartY = e.clientY;
-            initialPanX = currentPanX;
-            initialPanY = currentPanY;
+            isDragging = true; readerViewContainer.classList.add('is-dragging'); readerViewContainer.style.cursor = 'grabbing';
+            dragStartX = e.clientX; dragStartY = e.clientY; initialPanX = currentPanX; initialPanY = currentPanY;
         });
-
         window.addEventListener('mousemove', (e) => {
             if (!isDragging) return;
-            const dx = e.clientX - dragStartX;
-            const dy = e.clientY - dragStartY;
-            currentPanX = initialPanX + dx;
-            currentPanY = initialPanY + dy;
-            applyTransform();
+            currentPanX = initialPanX + (e.clientX - dragStartX); currentPanY = initialPanY + (e.clientY - dragStartY); applyTransform();
         });
-
-        window.addEventListener('mouseup', () => {
-            if (isDragging) {
-                isDragging = false;
-                readerViewContainer.classList.remove('is-dragging');
-                readerViewContainer.style.cursor = 'grab';
-            }
-        });
+        window.addEventListener('mouseup', () => { if (isDragging) { isDragging = false; readerViewContainer.classList.remove('is-dragging'); readerViewContainer.style.cursor = 'grab'; } });
 
         function toggleFullscreen() {
-            const readerView = document.getElementById('view-reader');
-            const fullscreenBtn = document.getElementById('fullscreen-btn');
-
+            const rv = document.getElementById('view-reader'), fb = document.getElementById('fullscreen-btn');
             if (!document.fullscreenElement && !isPseudoFullscreen) {
-                if (readerView.requestFullscreen) {
-                    readerView.requestFullscreen().catch(() => enablePseudoFullscreen());
-                } else {
-                    enablePseudoFullscreen();
-                }
+                if (rv.requestFullscreen) rv.requestFullscreen().catch(() => enablePseudoFullscreen()); else enablePseudoFullscreen();
             } else {
-                if (document.fullscreenElement) {
-                    document.exitFullscreen();
-                } else {
-                    disablePseudoFullscreen();
-                }
+                if (document.fullscreenElement) document.exitFullscreen(); else disablePseudoFullscreen();
             }
         }
-
-        function enablePseudoFullscreen() {
-            isPseudoFullscreen = true;
-            document.body.classList.add('is-fullscreen');
-            document.getElementById('fullscreen-btn').innerHTML = '<i class="fa-solid fa-compress"></i> <span class="hidden md:inline">Exit</span>';
-        }
-
-        function disablePseudoFullscreen() {
-            isPseudoFullscreen = false;
-            document.body.classList.remove('is-fullscreen');
-            document.getElementById('fullscreen-btn').innerHTML = '<i class="fa-solid fa-expand"></i> <span class="hidden md:inline">Full Screen</span>';
-        }
-
-        document.addEventListener('fullscreenchange', () => {
-            const btn = document.getElementById('fullscreen-btn');
-            if (!document.fullscreenElement && !isPseudoFullscreen) {
-                document.body.classList.remove('is-fullscreen');
-                btn.innerHTML = '<i class="fa-solid fa-expand"></i> <span class="hidden md:inline">Full Screen</span>';
-            } else if (document.fullscreenElement) {
-                btn.innerHTML = '<i class="fa-solid fa-compress"></i> <span class="hidden md:inline">Exit</span>';
-            }
-        });
+        function enablePseudoFullscreen() { isPseudoFullscreen = true; document.body.classList.add('is-fullscreen'); document.getElementById('fullscreen-btn').innerHTML = '<i class="fa-solid fa-compress"></i> <span class="hidden md:inline">Exit</span>'; }
+        function disablePseudoFullscreen() { isPseudoFullscreen = false; document.body.classList.remove('is-fullscreen'); document.getElementById('fullscreen-btn').innerHTML = '<i class="fa-solid fa-expand"></i> <span class="hidden md:inline">Full Screen</span>'; }
 
         function toggleBookmarkCurrent() {
             if (!currentBook) return;
-            const existingIdx = bookmarks.findIndex(b => b.bookId === currentBook.id && b.spread === currentPageIndex);
-            
-            if (existingIdx > -1) {
-                bookmarks.splice(existingIdx, 1);
-            } else {
-                bookmarks.push({ bookId: currentBook.id, title: currentBook.title, coverUrl: currentBook.coverUrl, spread: currentPageIndex });
-            }
-            updateBookmarkButtonState();
-            renderBookmarks();
+            const idx = bookmarks.findIndex(b => b.bookId === currentBook.id && b.spread === currentPageIndex);
+            if (idx > -1) bookmarks.splice(idx, 1);
+            else bookmarks.push({ bookId: currentBook.id, title: currentBook.title, coverUrl: currentBook.coverUrl, spread: currentPageIndex });
+            updateBookmarkButtonState(); renderBookmarks();
         }
-
         function updateBookmarkButtonState() {
             if (!currentBook) return;
             const btn = document.getElementById('bookmark-btn');
             const isBookmarked = bookmarks.some(b => b.bookId === currentBook.id && b.spread === currentPageIndex);
-            if (isBookmarked) {
-                btn.innerHTML = '<i class="fa-solid fa-bookmark text-gold"></i>';
-            } else {
-                btn.innerHTML = '<i class="fa-regular fa-bookmark"></i>';
-            }
+            btn.innerHTML = isBookmarked ? '<i class="fa-solid fa-bookmark text-gold"></i>' : '<i class="fa-regular fa-bookmark"></i>';
         }
-
         function renderBookmarks() {
             const grid = document.getElementById('bookmarks-grid');
             if (!grid) return;
-            if (bookmarks.length === 0) {
-                grid.innerHTML = '<p class="text-xs text-gray-500 col-span-full">No bookmarks saved yet. Click the bookmark icon while reading.</p>';
-                return;
-            }
-            grid.innerHTML = bookmarks.map(b => `
-                <div onclick="openReader('${b.bookId}'); currentPageIndex = ${b.spread}; updateReaderUI();" class="book-card cursor-pointer bg-neutral-900 border border-white/10 rounded-2xl p-3 flex flex-col space-y-3">
-                    <img src="${b.coverUrl}" class="w-full rounded-xl shadow-md">
-                    <div>
-                        <h4 class="font-serif font-bold text-sm text-white truncate">${b.title}</h4>
-                        <span class="text-[10px] text-gold">Location #${b.spread + 1}</span>
-                    </div>
-                </div>
-            `).join('');
+            if (bookmarks.length === 0) { grid.innerHTML = '<p class="text-xs text-gray-500 col-span-full">No bookmarks saved yet. Click the bookmark icon while reading.</p>'; return; }
+            grid.innerHTML = bookmarks.map(b => `<div onclick="openReader('${b.bookId}'); currentPageIndex = ${b.spread}; updateReaderUI();" class="book-card cursor-pointer bg-neutral-900 border border-white/10 rounded-2xl p-3 flex flex-col space-y-3"><img src="${b.coverUrl}" class="w-full rounded-xl shadow-md"><div><h4 class="font-serif font-bold text-sm text-white truncate">${b.title}</h4><span class="text-[10px] text-gold">Location #${b.spread + 1}</span></div></div>`).join('');
         }
 
         let activeEditorInput = null;
@@ -1310,14 +1023,12 @@
             const content = canvas.innerHTML;
             activeEditorInput.value = content;
             
-            // Generate clean preview snippet
             let previewText = canvas.textContent || canvas.innerText || '';
             if (previewText.length > 40) previewText = previewText.substring(0, 40) + '...';
             if (!previewText.trim() && content.includes('<img')) previewText = '[Image Content]';
             if (!previewText.trim()) previewText = 'Empty Page...';
             
             activeEditorPreview.innerText = previewText;
-            
             closeA4Editor();
         }
 
@@ -1326,13 +1037,70 @@
             document.getElementById('a4-canvas').focus();
         }
 
+        function updatePageLayout(setting, value) {
+            const canvas = document.getElementById('a4-canvas');
+            if (setting === 'margin') canvas.style.padding = value;
+            if (setting === 'lineHeight') canvas.style.lineHeight = value;
+        }
+
         function addEditorImage() {
             const url = prompt("Enter Image URL (e.g., https://example.com/image.jpg):");
             if (url) {
-                let size = prompt("Enter Image Width (e.g., 100%, 300px, 50%):", "100%");
-                if (!size) size = "100%";
-                const imgHTML = `<img src="${url}" style="width: ${size}; max-width: 100%; height: auto;" />`;
-                document.execCommand('insertHTML', false, imgHTML);
+                let size = prompt("Enter Image Width (e.g., 100%, 300px, 50%):", "100%") || "100%";
+                document.execCommand('insertHTML', false, `<img src="${url}" style="width: ${size}; max-width: 100%; height: auto;" />`);
+            }
+        }
+
+        function insertTable() {
+            let html = '<table class="w-full mb-4 border-collapse border border-white/20 text-left"><tbody>';
+            for(let r=0; r<3; r++) {
+                html += '<tr>';
+                for(let c=0; c<3; c++) html += '<td class="border border-white/20 p-2 text-sm">Data</td>';
+                html += '</tr>';
+            }
+            html += '</tbody></table><p><br></p>';
+            document.execCommand('insertHTML', false, html);
+        }
+
+        function insertVisual(type) {
+            let html = '';
+            if (type === 'line') html = '<hr class="fancy-line" /><p><br></p>';
+            else if (type === 'box') html = '<div class="shape-box"><strong>Highlighted Note</strong><br>Type your content here...</div><p><br></p>';
+            else if (type === 'chart') html = '<table style="width:50%; margin:1em auto;"><tr><th style="width:30%">Label A</th><td><div style="background:#d2a85e; width:80%; height:12px;"></div></td></tr><tr><th>Label B</th><td><div style="background:#d2a85e; width:45%; height:12px;"></div></td></tr></table><p><br></p>';
+            if(html) document.execCommand('insertHTML', false, html);
+        }
+
+        function applyTemplate(type) {
+            let html = '';
+            if (type === 'title') html = '<h1 style="text-align:center; font-size: 2.5em; margin-bottom: 0.2em; color: #fff;">Chapter Title</h1><p style="text-align:center; font-style:italic; color: #9ca3af; margin-bottom:2em;">Subtitle goes here</p>';
+            else if (type === 'quote') html = '<blockquote style="border-left: 4px solid #d2a85e; padding-left: 1.5rem; font-style: italic; color: #9ca3af; margin: 1.5rem 0; font-size: 1.25em;">"Insert beautiful quote here."</blockquote>';
+            else if (type === 'pageNum') html = '<div style="text-align:center; margin-top: 2rem; color: #d2a85e; font-family: monospace; font-size:0.75rem;">- PAGE {N} -</div>';
+            if (html) document.execCommand('insertHTML', false, html);
+        }
+
+        // Custom Search and Replace Logic
+        function toggleSearchReplace() {
+            const panel = document.getElementById('search-replace-panel');
+            panel.classList.toggle('hidden');
+        }
+
+        function findNextText() {
+            const term = document.getElementById('sr-find').value;
+            if (!term) return;
+            const canvas = document.getElementById('a4-canvas');
+            canvas.focus();
+            const found = window.find(term, false, false, true, false, true, false);
+            if (!found) customAlert("No matches found.");
+        }
+
+        function replaceText() {
+            const replaceStr = document.getElementById('sr-replace').value;
+            const sel = window.getSelection();
+            if (sel.rangeCount && sel.toString().toLowerCase() === document.getElementById('sr-find').value.toLowerCase()) {
+                document.execCommand('insertText', false, replaceStr);
+                findNextText();
+            } else {
+                findNextText();
             }
         }
 
@@ -1367,16 +1135,14 @@
 
         function openPublishModal(editId = null) { 
             if (!currentUser) {
-                alert("Please log in to publish or edit books.");
-                openAuthModal();
-                forceAuthMode('login');
-                return;
+                customAlert("Please log in to publish or edit books.");
+                openAuthModal(); forceAuthMode('login'); return;
             }
 
             editingBookId = typeof editId === 'string' ? editId : null;
             const titleEl = document.getElementById('publish-modal-title');
             const container = document.getElementById('pub-pages-container');
-            container.innerHTML = ''; // Reset container
+            container.innerHTML = '';
             
             if (editingBookId) {
                 const book = books.find(b => b.id === editingBookId);
@@ -1385,14 +1151,9 @@
                     document.getElementById('pub-title').value = book.title || '';
                     document.getElementById('pub-cover').value = book.coverUrl || '';
                     document.getElementById('pub-author').value = currentUser.name || currentUser.email;
-                    
-                    // User pages usually start at index 3 (cover, title, copyright)
                     let userPages = book.pages.slice(3);
-                    if (userPages.length === 0) {
-                        addPageInput('');
-                    } else {
-                        userPages.forEach(p => addPageInput(p));
-                    }
+                    if (userPages.length === 0) addPageInput('');
+                    else userPages.forEach(p => addPageInput(p));
                 }
             } else {
                 titleEl.innerText = "Publish a Book or Manga";
@@ -1401,36 +1162,27 @@
                 document.getElementById('pub-author').value = currentUser.name || currentUser.email;
                 addPageInput('');
             }
-
             document.getElementById('publish-modal').classList.remove('hidden'); 
         }
 
-        function editBookBtn(e, bookId) {
-            e.stopPropagation();
-            openPublishModal(bookId);
-        }
+        function editBookBtn(e, bookId) { e.stopPropagation(); openPublishModal(bookId); }
 
         function deleteBookBtn(e, bookId) {
             e.stopPropagation();
-            if (confirm("Are you sure you want to delete this book? This action cannot be undone.")) {
+            customConfirm("Are you sure you want to delete this book? This action cannot be undone.", () => {
                 books = books.filter(b => b.id !== bookId);
                 renderHomeCatalog();
-                if (!document.getElementById('view-library').classList.contains('hidden')) {
-                    filterCategory('All'); 
-                }
-            }
+                if (!document.getElementById('view-library').classList.contains('hidden')) filterCategory('All');
+            });
         }
 
         function closePublishModal() { document.getElementById('publish-modal').classList.add('hidden'); }
-        function openSyncModal() { document.getElementById('sync-modal').classList.remove('hidden'); }
-        function closeSyncModal() { document.getElementById('sync-modal').classList.add('hidden'); }
         function openAuthModal() { document.getElementById('auth-modal').classList.remove('hidden'); }
         function closeAuthModal() { document.getElementById('auth-modal').classList.add('hidden'); }
 
         function addPageInput(content = '') {
             const container = document.getElementById('pub-pages-container');
             const rowCount = container.querySelectorAll('.page-input-row').length + 1;
-            
             const div = document.createElement('div');
             div.innerHTML = createPageRow(content, rowCount);
             container.appendChild(div.firstElementChild);
@@ -1440,13 +1192,10 @@
         function removePageInput(btn) {
             const container = document.getElementById('pub-pages-container');
             if (container.querySelectorAll('.page-input-row').length <= 1) {
-                alert('You must have at least one page.');
-                return;
+                customAlert('You must have at least one page.'); return;
             }
             btn.closest('.page-input-row').remove();
-            
-            const rows = container.querySelectorAll('.page-input-row');
-            rows.forEach((row, index) => {
+            container.querySelectorAll('.page-input-row').forEach((row, index) => {
                 row.querySelector('.page-number').innerText = 'Page ' + (index + 1);
             });
         }
@@ -1471,103 +1220,64 @@
         function updateAuthUI() {
             const headerAuth = document.getElementById('auth-container');
             const settingsAuth = document.getElementById('settings-auth-container');
-            
             if (currentUser) {
-                const displayName = currentUser.name || currentUser.email;
-                if(headerAuth) headerAuth.innerHTML = `<span class="text-xs text-gold font-medium px-3 py-1.5"><i class="fa-solid fa-user-check mr-1"></i> ${displayName}</span>`;
-                if(settingsAuth) {
-                    settingsAuth.innerHTML = `
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <p class="text-sm text-white font-medium">Logged in as: <span class="text-gold">${displayName}</span></p>
-                            </div>
-                            <button onclick="logout()" class="px-4 py-2 rounded-xl bg-white/5 border border-white/10 hover:bg-red-500/20 hover:text-red-400 text-xs text-white transition">Log Out</button>
-                        </div>`;
-                }
+                const dn = currentUser.name || currentUser.email;
+                if(headerAuth) headerAuth.innerHTML = `<span class="text-xs text-gold font-medium px-3 py-1.5"><i class="fa-solid fa-user-check mr-1"></i> ${dn}</span>`;
+                if(settingsAuth) settingsAuth.innerHTML = `<div class="flex items-center justify-between"><div><p class="text-sm text-white font-medium">Logged in as: <span class="text-gold">${dn}</span></p></div><button onclick="logout()" class="px-4 py-2 rounded-xl bg-white/5 border border-white/10 hover:bg-red-500/20 hover:text-red-400 text-xs text-white transition">Log Out</button></div>`;
             } else {
                 if(headerAuth) headerAuth.innerHTML = `<button onclick="openAuthModal()" class="px-3 py-1.5 md:px-4 md:py-2 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 transition text-[10px] md:text-xs font-medium text-white">Log In</button>`;
-                if(settingsAuth) {
-                    settingsAuth.innerHTML = `
-                        <div class="flex items-center space-x-3">
-                            <button onclick="openAuthModal(); forceAuthMode('login');" class="px-4 py-2 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-xs text-white transition">Log In</button>
-                            <button onclick="openAuthModal(); forceAuthMode('register');" class="px-4 py-2 rounded-xl bg-gold text-black hover:bg-darkgold text-xs font-semibold transition">Sign Up</button>
-                        </div>`;
-                }
+                if(settingsAuth) settingsAuth.innerHTML = `<div class="flex items-center space-x-3"><button onclick="openAuthModal(); forceAuthMode('login');" class="px-4 py-2 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-xs text-white transition">Log In</button><button onclick="openAuthModal(); forceAuthMode('register');" class="px-4 py-2 rounded-xl bg-gold text-black hover:bg-darkgold text-xs font-semibold transition">Sign Up</button></div>`;
             }
-
             renderHomeCatalog();
-            if (!document.getElementById('view-library').classList.contains('hidden')) {
-                filterCategory('All'); 
-            }
+            if (!document.getElementById('view-library').classList.contains('hidden')) filterCategory('All');
         }
 
-        function logout() {
-            currentUser = null;
-            updateAuthUI();
-        }
+        function logout() { currentUser = null; updateAuthUI(); }
 
         async function handleAuthSubmit() {
             const email = document.getElementById('auth-email').value;
             const password = document.getElementById('auth-password').value;
             const name = document.getElementById('auth-name').value;
-
-            if (!email || !password) { 
-                alert('Please enter your email and password.'); 
-                return; 
-            }
-
-            if (isRegisterMode && !name) {
-                alert('Please enter your full name to register.');
-                return;
-            }
+            if (!email || !password) { customAlert('Please enter your email and password.'); return; }
+            if (isRegisterMode && !name) { customAlert('Please enter your full name to register.'); return; }
 
             try {
-                const payload = {
-                    action: isRegisterMode ? 'register' : 'login',
-                    email: email,
-                    password: password,
-                    name: name
-                };
-
-                const res = await fetch(API_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                    body: JSON.stringify(payload)
-                });
+                const payload = { action: isRegisterMode ? 'register' : 'login', email, password, name };
+                const res = await fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(payload) });
                 const result = await res.json();
-
                 if (result.success) {
                     currentUser = { email: email, name: isRegisterMode ? name : (result.name || email.split('@')[0]) };
-                    updateAuthUI();
-                    closeAuthModal();
-                } else {
-                    alert('Auth Error: ' + (result.error || 'Authentication failed.'));
-                }
+                    updateAuthUI(); closeAuthModal();
+                } else customAlert('Auth Error: ' + (result.error || 'Authentication failed.'));
             } catch (err) {
                 currentUser = { email: email, name: isRegisterMode ? name : email.split('@')[0] };
-                updateAuthUI();
-                closeAuthModal();
+                updateAuthUI(); closeAuthModal();
             }
         }
-
         updateAuthUI();
+
+        function toggleGenre(btn) {
+            btn.classList.toggle('selected-genre');
+            if (btn.classList.contains('selected-genre')) {
+                btn.classList.add('bg-gold/20', 'text-gold', 'border-gold/50');
+                btn.classList.remove('text-gray-400', 'border-white/20');
+            } else {
+                btn.classList.remove('bg-gold/20', 'text-gold', 'border-gold/50');
+                btn.classList.add('text-gray-400', 'border-white/20');
+            }
+        }
 
         function setTheme(mode) {
             const btnDark = document.getElementById('theme-btn-dark');
             const btnLight = document.getElementById('theme-btn-light');
-            
             if (mode === 'light') {
                 document.body.classList.add('light-theme');
-                btnLight.classList.add('bg-white/10', 'text-white');
-                btnLight.classList.remove('text-gray-400');
-                btnDark.classList.remove('bg-white/10', 'text-white');
-                btnDark.classList.add('text-gray-400');
+                btnLight.classList.add('bg-white/10', 'text-white'); btnLight.classList.remove('text-gray-400');
+                btnDark.classList.remove('bg-white/10', 'text-white'); btnDark.classList.add('text-gray-400');
             } else {
                 document.body.classList.remove('light-theme');
-                btnDark.classList.add('bg-white/10', 'text-white');
-                btnDark.classList.remove('text-gray-400');
-                btnLight.classList.remove('bg-white/10', 'text-white');
-                btnLight.classList.add('text-gray-400');
+                btnDark.classList.add('bg-white/10', 'text-white'); btnDark.classList.remove('text-gray-400');
+                btnLight.classList.remove('bg-white/10', 'text-white'); btnLight.classList.add('text-gray-400');
             }
         }
 
@@ -1578,149 +1288,46 @@
             const keywords = document.getElementById('pub-keywords').value.trim();
             const desc = document.getElementById('pub-desc').value.trim();
             const includeCopyright = document.getElementById('pub-copyright').checked;
-            
             const selectedPills = document.querySelectorAll('.selected-genre');
             const genresList = Array.from(selectedPills).map(pill => pill.innerText).join(', ');
             const genre = genresList || 'General';
-
             const coverUrl = document.getElementById('pub-cover').value || 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=600&q=80';
-            
             const pageInputs = Array.from(document.querySelectorAll('.pub-page-hidden-input'));
             const userPages = pageInputs.map(input => input.value.trim()).filter(val => val !== '');
 
-            if (!title || userPages.length === 0) {
-                alert('Please fill out the title and add at least one page.');
-                return;
-            }
+            if (!title || userPages.length === 0) { customAlert('Please fill out the title and add at least one page.'); return; }
 
-            const titlePageHTML = `
-                <div class="flex flex-col items-center justify-center h-full text-center py-16 px-8 relative">
-                    <div class="absolute top-12 w-16 h-px bg-gold/50"></div>
-                    <div class="flex-1 flex flex-col justify-center w-full">
-                        <h1 class="text-3xl md:text-5xl font-bold mb-4 font-serif text-white tracking-wide">${title}</h1>
-                        ${subtitle ? `<h2 class="text-lg md:text-xl italic text-gray-400 mb-8 font-serif">${subtitle}</h2>` : ''}
-                    </div>
-                    <div class="mt-auto pt-12 border-t border-white/10 w-2/3 mx-auto flex flex-col items-center">
-                        <span class="text-[10px] text-gray-500 uppercase tracking-widest mb-2">Written By</span>
-                        <span class="text-lg font-serif text-gold">${author}</span>
-                    </div>
-                </div>
-            `;
-
-            const copyrightPageHTML = `
-                <div class="flex flex-col justify-end h-full text-left py-12 px-8 text-[11px] leading-relaxed text-gray-500 space-y-4 font-sans">
-                    <div>
-                        <p class="font-bold text-gray-300 text-sm mb-1 font-serif">${title}</p>
-                        ${subtitle ? `<p class="italic mb-2">${subtitle}</p>` : ''}
-                    </div>
-                    <p>Copyright © ${new Date().getFullYear()} by ${author}</p>
-                    <p>All rights reserved. No part of this publication may be reproduced, distributed, or transmitted in any form or by any means...</p>
-                    ${desc ? `<div><p class="font-semibold text-gray-400 mb-1">Description:</p><p>${desc}</p></div>` : ''}
-                    ${keywords ? `<p><span class="font-semibold text-gray-400">Keywords:</span> ${keywords}</p>` : ''}
-                    <div class="pt-4 mt-4 border-t border-white/10">
-                        <p>Published via Ink & Light 3D Reader.</p>
-                    </div>
-                </div>
-            `;
-
+            const titlePageHTML = `<div class="flex flex-col items-center justify-center h-full text-center py-16 px-8 relative"><div class="absolute top-12 w-16 h-px bg-gold/50"></div><div class="flex-1 flex flex-col justify-center w-full"><h1 class="text-3xl md:text-5xl font-bold mb-4 font-serif text-white tracking-wide">${title}</h1>${subtitle ? `<h2 class="text-lg md:text-xl italic text-gray-400 mb-8 font-serif">${subtitle}</h2>` : ''}</div><div class="mt-auto pt-12 border-t border-white/10 w-2/3 mx-auto flex flex-col items-center"><span class="text-[10px] text-gray-500 uppercase tracking-widest mb-2">Written By</span><span class="text-lg font-serif text-gold">${author}</span></div></div>`;
+            const copyrightPageHTML = `<div class="flex flex-col justify-end h-full text-left py-12 px-8 text-[11px] leading-relaxed text-gray-500 space-y-4 font-sans"><div><p class="font-bold text-gray-300 text-sm mb-1 font-serif">${title}</p>${subtitle ? `<p class="italic mb-2">${subtitle}</p>` : ''}</div><p>Copyright © ${new Date().getFullYear()} by ${author}</p><p>All rights reserved. No part of this publication may be reproduced, distributed, or transmitted in any form or by any means...</p>${desc ? `<div><p class="font-semibold text-gray-400 mb-1">Description:</p><p>${desc}</p></div>` : ''}${keywords ? `<p><span class="font-semibold text-gray-400">Keywords:</span> ${keywords}</p>` : ''}<div class="pt-4 mt-4 border-t border-white/10"><p>Published via Ink & Light 3D Reader.</p></div></div>`;
             const blankPage = "<div class='flex items-center justify-center h-full w-full text-gray-600/30 italic font-serif text-sm'>>[Inside Cover]<</div>";
             const blankRightPage = "<div class='flex items-center justify-center h-full w-full text-gray-600/30 italic font-serif text-sm'>>[Blank]<</div>";
-
-            const bookPages = [
-                blankPage, 
-                titlePageHTML, 
-                includeCopyright ? copyrightPageHTML : blankRightPage,
-                ...userPages
-            ];
-
+            const bookPages = [ blankPage, titlePageHTML, includeCopyright ? copyrightPageHTML : blankRightPage, ...userPages ];
             const rawContent = bookPages.join(' ||PAGE|| ');
 
             if (editingBookId) {
                 const bIndex = books.findIndex(b => b.id === editingBookId);
                 if (bIndex > -1) {
-                    books[bIndex].title = title;
-                    books[bIndex].genre = genre;
-                    books[bIndex].coverUrl = coverUrl;
-                    books[bIndex].pages = [coverUrl, ...bookPages];
+                    books[bIndex].title = title; books[bIndex].genre = genre; books[bIndex].coverUrl = coverUrl; books[bIndex].pages = [coverUrl, ...bookPages];
                 }
                 openReader(editingBookId);
             } else {
-                const newBook = {
-                    id: 'bk_' + Date.now(),
-                    title,
-                    genre,
-                    coverUrl,
-                    authorEmail: currentUser.email,
-                    pages: [coverUrl, ...bookPages]
-                };
-
+                const newBook = { id: 'bk_' + Date.now(), title, genre, coverUrl, authorEmail: currentUser.email, pages: [coverUrl, ...bookPages] };
                 try {
                     fetch(API_URL, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                        body: JSON.stringify({
-                            action: 'publish',
-                            bookId: newBook.id,
-                            title: title,
-                            genre: genre,
-                            coverUrl: coverUrl,
-                            authorEmail: currentUser.email,
-                            content: rawContent
-                        })
+                        method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                        body: JSON.stringify({ action: 'publish', bookId: newBook.id, title, genre, coverUrl, authorEmail: currentUser.email, content: rawContent })
                     });
-                } catch (err) {
-                    console.warn('Published locally, API post skipped:', err);
-                }
-
-                books.unshift(newBook);
-                openReader(newBook.id);
+                } catch (err) { console.warn('Published locally, API post skipped'); }
+                books.unshift(newBook); openReader(newBook.id);
             }
 
-            renderHomeCatalog();
-            closePublishModal();
-            editingBookId = null;
-            
-            document.getElementById('pub-title').value = '';
-            document.getElementById('pub-subtitle').value = '';
-            document.getElementById('pub-author').value = '';
-            document.getElementById('pub-keywords').value = '';
-            document.getElementById('pub-desc').value = '';
-            document.getElementById('pub-cover').value = '';
+            renderHomeCatalog(); closePublishModal(); editingBookId = null;
+            document.getElementById('pub-title').value = ''; document.getElementById('pub-subtitle').value = ''; document.getElementById('pub-author').value = '';
+            document.getElementById('pub-keywords').value = ''; document.getElementById('pub-desc').value = ''; document.getElementById('pub-cover').value = '';
             document.getElementById('pub-copyright').checked = true;
             document.querySelectorAll('.selected-genre').forEach(pill => toggleGenre(pill));
-            
             const container = document.getElementById('pub-pages-container');
-            container.innerHTML = '';
-            addPageInput('');
-
-            openReader(newBook.id);
-        }
-
-        async function processGoogleDocSync() {
-            const docUrl = document.getElementById('sync-url').value;
-            const title = document.getElementById('sync-title').value || 'Imported Google Doc';
-
-            if (!docUrl) {
-                alert('Please enter a valid public Google Doc URL.');
-                return;
-            }
-
-            try {
-                await fetch(API_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                    body: JSON.stringify({
-                        action: 'publish',
-                        title: title,
-                        genre: 'Document',
-                        coverUrl: 'https://images.unsplash.com/photo-1457369804613-52c61a468e7d?auto=format&fit=crop&w=600&q=80',
-                        content: `Synced from: ${docUrl}`
-                    })
-                });
-            } catch (err) {}
-
-            closeSyncModal();
-            alert(`Document reference submitted!`);
+            container.innerHTML = ''; addPageInput('');
         }
 
         function filterBooks() {
@@ -1730,80 +1337,34 @@
         }
 
         function filterCategory(category) {
-            if (category === 'All') {
-                renderHomeCatalog();
-                closeSidebarOnMobile();
-                return;
-            }
+            if (category === 'All') { renderHomeCatalog(); closeSidebarOnMobile(); return; }
             const filtered = books.filter(b => b.genre.toLowerCase().includes(category.toLowerCase()));
-            updateGrid(filtered);
-            closeSidebarOnMobile();
+            updateGrid(filtered); closeSidebarOnMobile();
         }
 
         function updateGrid(filtered) {
             const grid = document.getElementById('books-grid');
             if (!grid) return;
-            
             if (filtered.length === 0) {
-                grid.innerHTML = `<div class="col-span-full flex flex-col items-center justify-center text-center py-16 text-gray-500 border-2 border-dashed border-white/10 rounded-2xl">
-                    <i class="fa-solid fa-magnifying-glass text-3xl mb-4 text-white/20"></i>
-                    <p class="font-serif text-lg text-white mb-2">No books found</p>
-                    <p class="text-xs">Try adjusting your search or category filters.</p>
-                </div>`;
-                return;
+                grid.innerHTML = `<div class="col-span-full flex flex-col items-center justify-center text-center py-16 text-gray-500 border-2 border-dashed border-white/10 rounded-2xl"><i class="fa-solid fa-magnifying-glass text-3xl mb-4 text-white/20"></i><p class="font-serif text-lg text-white mb-2">No books found</p><p class="text-xs">Try adjusting your search or category filters.</p></div>`; return;
             }
-
             grid.innerHTML = filtered.map(book => generateBookCardHTML(book)).join('');
         }
 
-        function toggleFireflies(el) {
-            const bg = document.getElementById('forest');
-            if (bg) bg.style.display = el.checked ? 'block' : 'none';
-        }
-
-        // --- Golden Cursor Glitter ---
-        let glitterMode = 'light';
-        function updateGlitter(val) {
-            glitterMode = val;
-            if (val === 'none') {
-                document.querySelectorAll('.glitter-particle').forEach(p => p.remove());
-            }
-        }
-
         document.addEventListener('mousemove', (e) => {
-            if (glitterMode === 'none') return;
-            
-            // Limit creation rate based on mode
-            if (glitterMode === 'light' && Math.random() > 0.4) return;
-            if (glitterMode === 'heavy' && Math.random() > 0.8) return;
-
-            const count = glitterMode === 'heavy' ? 2 : 1;
-            
+            const count = 1;
+            if (Math.random() > 0.4) return;
             for(let i = 0; i < count; i++) {
                 const particle = document.createElement('div');
                 particle.className = 'glitter-particle';
-                
-                // Randomize position slightly around the cursor
-                const offsetX = (Math.random() - 0.5) * (glitterMode === 'heavy' ? 20 : 12);
-                const offsetY = (Math.random() - 0.5) * (glitterMode === 'heavy' ? 20 : 12);
-                particle.style.left = (e.clientX + offsetX) + 'px';
-                particle.style.top = (e.clientY + offsetY) + 'px';
-                
-                // Randomize size
+                const offsetX = (Math.random() - 0.5) * 12;
+                const offsetY = (Math.random() - 0.5) * 12;
+                particle.style.left = (e.clientX + offsetX) + 'px'; particle.style.top = (e.clientY + offsetY) + 'px';
                 const size = Math.random() * 4 + 2;
-                particle.style.width = size + 'px';
-                particle.style.height = size + 'px';
-                
-                // Random variables for animation trajectory
-                particle.style.setProperty('--rndX', Math.random());
-                particle.style.setProperty('--rndY', Math.random());
-                
+                particle.style.width = size + 'px'; particle.style.height = size + 'px';
+                particle.style.setProperty('--rndX', Math.random()); particle.style.setProperty('--rndY', Math.random());
                 document.body.appendChild(particle);
-                
-                // Clean up particle element after animation
-                setTimeout(() => {
-                    if (particle.parentNode) particle.remove();
-                }, 800);
+                setTimeout(() => { if (particle.parentNode) particle.remove(); }, 800);
             }
         });
 
